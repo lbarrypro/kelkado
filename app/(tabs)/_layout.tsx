@@ -1,7 +1,22 @@
-import { Tabs } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Tabs, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useAuth } from '@/hooks/useAuth';  // Le hook d'authentification
 
 export default function TabLayout() {
+    const user = useAuth();  // Récupérer l'utilisateur connecté
+
+    console.log('### TabLayout :: user: ', user);
+
+    const router = useRouter();
+
+    useEffect(() => {
+        if (user === null) {
+            // Si l'utilisateur n'est pas connecté, rediriger vers la page d'accueil
+            router.push('/');  // Rediriger vers la page de connexion ou d'accueil
+        }
+    }, [user, router]);
+
     return (
         <Tabs
             screenOptions={{
@@ -18,7 +33,7 @@ export default function TabLayout() {
             }}
         >
             <Tabs.Screen
-                name="index"
+                name="home"  // Renommé de "index" à "home"
                 options={{
                     title: 'Home',
                     headerShown: false, // Enlève le header
