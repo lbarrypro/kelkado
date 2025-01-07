@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuthActions } from '@/hooks/useAuthActions';
+import { useAuthActions } from '@/src/hooks/useAuthActions'; // Mise à jour du chemin d'importation
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -10,7 +10,7 @@ export default function Login() {
     const [isSignup, setIsSignup] = useState(false); // Mode login ou signup
     const router = useRouter();
 
-    const { signIn, signUp } = useAuthActions(); // Import des actions
+    const { signIn, signUp } = useAuthActions(); // Import des actions d'authentification
 
     const handleAuth = async () => {
         try {
@@ -25,7 +25,7 @@ export default function Login() {
 
             if (data?.user) {
                 // Rediriger si authentifié
-                router.push('/(tabs)/home');
+                router.push('/(tabs)/home'); // Correspond à `app/(tabs)/home.tsx`
             } else if (isSignup) {
                 setError('Vérifiez votre boîte mail pour confirmer votre inscription.');
             }

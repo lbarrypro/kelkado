@@ -1,35 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/hooks/useAuth';  // Le hook d'authentification
+import { useAuth } from '@/src/hooks/useAuth'; // Hook d'authentification
 
 export default function Index() {
     const { user, isVerified } = useAuth();
     const router = useRouter();
-    const [isMounted, setIsMounted] = useState(false); // Ajout d'un état pour vérifier si le composant est monté
+    const [isMounted, setIsMounted] = useState(false); // État pour vérifier si le composant est monté
 
     useEffect(() => {
-        // Indiquer que le composant est monté
+        // Marquer le composant comme monté
         setIsMounted(true);
     }, []);
 
     useEffect(() => {
-        // Attendre que le composant soit monté avant de naviguer
+        // Navigation conditionnelle après le montage du composant
         if (isMounted) {
-            if (user !== null) {
+            if (user) {
                 if (isVerified) {
-                    router.replace('/(tabs)/home');
+                    router.replace('/home'); // Rediriger vers la page "home" si vérifié
                 } else {
                     console.warn('Votre email n\'est pas vérifié. Veuillez vérifier vos emails.');
-                    router.push('/verify-email'); // Une page pour gérer la vérification d'email
+                    router.replace('/verify-email'); // Page de vérification d'email
                 }
             } else {
-                // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
-                router.replace('/login');  // Remplacez "/login" par la page de votre choix
+                // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+                router.replace('/auth/login'); // Chemin mis à jour pour suivre l'arborescence
             }
         } else {
-            console.error('Component not mounted');
+            console.error('Le composant n\'est pas monté');
         }
     }, [user, isMounted, isVerified, router]);
 
-    return null;  // Pas de UI ici, juste la logique de redirection
+    return null; // Pas d'interface ici, uniquement la logique de redirection
 }
