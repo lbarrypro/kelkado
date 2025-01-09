@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { Tabs, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useAuth } from '@/hooks/useAuth';  // Le hook d'authentification
+import { useAuth } from '@/src/hooks/useAuth';  // Le hook d'authentification
+
+console.log('### src/app/(tabs)/_layout');
 
 export default function TabLayout() {
     const user = useAuth();  // Récupérer l'utilisateur connecté

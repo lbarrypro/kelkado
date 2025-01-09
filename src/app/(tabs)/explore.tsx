@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput } from 'react-native';
 
+console.log('### src/app/(tabs)/explore.tsx');
+
 export default function ExploreScreen() {
     const [items, setItems] = useState(
         Array.from({ length: 20 }, (_, i) => ({

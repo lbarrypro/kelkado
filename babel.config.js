@@ -19,7 +19,12 @@ module.exports = function (api) {
 					extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
 				},
 			],
-			'inline-dotenv', // Garde l'option pour charger les variables d'environnement si nécessaire
+			[
+				'inline-dotenv',
+				{
+					path: '.env.development',
+				},
+			],
 		],
 	};
 };

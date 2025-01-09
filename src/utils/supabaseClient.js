@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_KEY;
 
-console.log('### process.env: ', process.env);
+console.log('### supabaseClient :: supabaseUrl: ', supabaseUrl);
+console.log('### supabaseClient :: supabaseKey: ', supabaseKey);
 
 export const supabase = createClient(supabaseUrl, supabaseKey);

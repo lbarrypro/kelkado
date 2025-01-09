@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
-import { supabase } from '@/lib/supabase'; // Assurez-vous que ce chemin est correct
+import { supabase } from '@/src/utils/supabaseClient'; // Assurez-vous que ce chemin est correct
 
 export default function VerifyEmail() {
     const [email, setEmail] = useState('');

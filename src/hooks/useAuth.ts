@@ -1,41 +1,49 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../utils/supabaseClient'; // Importation de l'instance Supabase
-import { User } from '@supabase/supabase-js'; // Type pour l'utilisateur Supabase
+import { supabase } from '../utils/supabaseClient';
+import { User } from '@supabase/supabase-js';
 
 interface UseAuthReturn {
     user: User | null;
+    loading: boolean;
     isVerified: boolean;
 }
 
 export function useAuth(): UseAuthReturn {
-    const [user, setUser] = useState<User | null>(null);  // L'utilisateur actuel
-    const [isVerified, setIsVerified] = useState<boolean>(false);  // Si l'utilisateur a vérifié son email
+    const [user, setUser] = useState<User | null>(null);
+    const [isVerified, setIsVerified] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [isMounted, setIsMounted] = useState<boolean>(false);
 
     useEffect(() => {
-        // Vérifier si l'utilisateur est connecté dès le départ
+        setIsMounted(true);
         const fetchUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 setUser(user);
-                setIsVerified(user.email_confirmed_at !== null); // Vérifier si l'email est confirmé
+                setIsVerified(user.email_confirmed_at !== null);
+            } else {
+                setUser(null);
+                setIsVerified(false);
             }
+            setLoading(false);
         };
 
         fetchUser();
 
-        // Écouter les changements d'authentification
-        const { data: subscription } = supabase.auth.onAuthStateChange(
-            (_, session) => {
+        const { data: subscription } = supabase.auth.onAuthStateChange((_, session) => {
+            if (isMounted) {
                 setUser(session?.user || null);
                 setIsVerified(session?.user?.email_confirmed_at !== null);
             }
-        );
+        });
 
-        // Nettoyer l'écouteur lorsqu'on quitte ce composant
         return () => {
-            subscription?.unsubscribe();
+            if (subscription?.unsubscribe) {
+                subscription.unsubscribe();  // Désinscription propre
+            }
+            setIsMounted(false); // Nettoyer l'état au démontage
         };
-    }, []);
+    }, [isMounted]);
 
-    return { user, isVerified };
+    return { user, loading, isVerified };
 }

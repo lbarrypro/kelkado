@@ -25,7 +25,28 @@ export const AuthProvider = ({ children }) => {
 
 	// Fonction de connexion
 	const signIn = async (email, password) => {
+
+		console.log('### signIn :: email:', email);
+		console.log('### signIn :: password:', password);
+
 		const { data, error } = await supabase.auth.signInWithPassword({
+			email,
+			password,
+		});
+
+		console.log('### signIn :: data:', data);
+		console.log('### signIn :: error:', error);
+
+		if (error) {
+			throw error;
+		}
+		setUser(data.user);
+		setIsVerified(data.user.user_metadata.email_verified);
+	};
+
+	// Fonction d'inscription
+	const signUp = async (email, password) => {
+		const { data, error } = await supabase.auth.signUp({
 			email,
 			password,
 		});
@@ -34,6 +55,7 @@ export const AuthProvider = ({ children }) => {
 		}
 		setUser(data.user);
 		setIsVerified(data.user.email_verified);
+		return { data, error };
 	};
 
 	// Fonction de déconnexion
@@ -54,12 +76,14 @@ export const AuthProvider = ({ children }) => {
 		);
 
 		return () => {
-			listener?.unsubscribe();
+			if (listener?.unsubscribe) {
+				listener?.unsubscribe();
+			}
 		};
 	}, []);
 
 	return (
-		<AuthContext.Provider value={{ user, isVerified, loading, signIn, signOut }}>
+		<AuthContext.Provider value={{ user, isVerified, loading, signIn, signUp, signOut }}>
 			{children}
 		</AuthContext.Provider>
 	);

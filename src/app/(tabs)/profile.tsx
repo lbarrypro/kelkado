@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { router } from "expo-router";
 
+console.log('### src/app/(tabs)/profile.tsx');
+
 export default function ProfileScreen() {
     // Exemple de données utilisateur
     const user = {

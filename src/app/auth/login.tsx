@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuthActions } from '@/src/hooks/useAuthActions'; // Mise à jour du chemin d'importation
+import { useAuth } from '@/src/provider/AuthProvider';  // Utilisation du hook useAuth
+
+console.log('### src/app/auth/login.tsx');
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -10,13 +12,20 @@ export default function Login() {
     const [isSignup, setIsSignup] = useState(false); // Mode login ou signup
     const router = useRouter();
 
-    const { signIn, signUp } = useAuthActions(); // Import des actions d'authentification
+    // Utilisation des méthodes d'authentification via le hook useAuth
+    const { signIn, signUp } = useAuth();
 
     const handleAuth = async () => {
         try {
+
+            console.log('### handleAuth :: isSignup: ', isSignup);
+
             const { data, error } = isSignup
-                ? await signUp(email, password)
-                : await signIn(email, password);
+                ? await signUp(email, password)  // Utilisation de signUp
+                : await signIn(email, password);  // Utilisation de signIn
+
+            console.log('### handleAuth :: data: ', data);
+            console.log('### handleAuth :: error: ', error);
 
             if (error) {
                 setError(error.message);
