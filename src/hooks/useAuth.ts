@@ -1,5 +1,6 @@
 import { useContext } from 'react';
-import { AuthContext } from '../provider/AuthProvider';
+// import { AuthContext } from '../provider/AuthProvider';
+import { AuthContext } from '@/src/context/AuthContext';
 import { User } from "@supabase/auth-js";
 
 // Définir le type des valeurs retournées par le hook
