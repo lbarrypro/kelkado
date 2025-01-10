@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import 'dotenv/config'; // Charge les variables d'environnement depuis le fichier .env
 
 export default ({ config }: { config: any }) => ({
 	expo: {
@@ -13,12 +13,14 @@ export default ({ config }: { config: any }) => ({
 		newArchEnabled: true,
 		ios: {
 			supportsTablet: true,
+			orientation: 'portrait',  // Ajouter ici pour forcer le mode portrait
 		},
 		android: {
 			adaptiveIcon: {
 				foregroundImage: './assets/images/adaptive-icon.png',
 				backgroundColor: '#ffffff',
 			},
+			orientation: 'portrait',  // Ajouter ici pour forcer le mode portrait
 		},
 		web: {
 			bundler: 'metro',
@@ -26,9 +28,9 @@ export default ({ config }: { config: any }) => ({
 			favicon: './assets/images/favicon.png',
 			build: {
 				babel: {
-					plugins: ['react-native-web']
-				}
-			}
+					plugins: ['react-native-web'],
+				},
+			},
 		},
 		plugins: [
 			'expo-router',
@@ -46,18 +48,22 @@ export default ({ config }: { config: any }) => ({
 			typedRoutes: true,
 		},
 		extra: {
-			router: {
-				origin: false,
-			},
+			// Variables d'environnement injectées
+			environment: process.env.NODE_ENV || 'development',
+
+			apiUrl: process.env.API_URL,
+			authProviderUrl: process.env.EXPO_PUBLIC_AUTHPROVIDER_URL,
+			authProviderKey: process.env.EXPO_PUBLIC_AUTHPROVIDER_KEY,
+
+			// Configuration spécifique à Expo Router
+			EXPO_ROUTER_IMPORT_MODE: process.env.EXPO_ROUTER_IMPORT_MODE || 'sync',
+			EXPO_ROUTER_APP_ROOT: process.env.EXPO_ROUTER_APP_ROOT || 'src/app',
+
+			// Configuration pour EAS (Expo Application Services)
 			eas: {
 				projectId: 'fdff3655-7aae-482a-90f5-d79435366ad7',
 			},
-			// Ajout de variables d'environnement pour un accès dynamique
-			apiUrl: process.env.API_URL,
-			environment: process.env.NODE_ENV || 'development',
-			EXPO_ROUTER_IMPORT_MODE: process.env.EXPO_ROUTER_IMPORT_MODE || 'filesystem',
-			EXPO_ROUTER_APP_ROOT: process.env.EXPO_ROUTER_APP_ROOT || 'src',
 		},
-		owner: 'lbarrypro',
+		owner: 'lbarrypro', // Remplacez par votre nom de propriétaire si nécessaire
 	},
 });

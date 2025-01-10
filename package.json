@@ -3,9 +3,8 @@
   "main": "index.ts",
   "version": "1.0.0",
   "scripts": {
-    "start:dev": "APP_ENV=development npx expo start -c",
-    "start": "NODE_ENV=development EXPO_ROUTER_APP_ROOT=src npx expo start",
-    "clear": "NODE_ENV=development EXPO_ROUTER_APP_ROOT=src npx expo start -c",
+    "start": "NODE_ENV=development npx expo start",
+    "clear": "NODE_ENV=development npx expo start -c",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "npx expo start --android",
     "ios": "npx expo start --ios",

@@ -2,9 +2,9 @@ module.exports = function (api) {
 	api.cache(true);
 
 	const envFile =
-		process.env.APP_ENV === 'production'
+		process.env.NODE_ENV === 'production'
 			? '.env.production'
-			: process.env.APP_ENV === 'staging'
+			: process.env.NODE_ENV === 'staging'
 				? '.env.staging'
 				: '.env.development'; // Par défaut, développement.
 
