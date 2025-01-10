@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { AuthProviderInterface } from '@/src/provider/AuthProviderInterface'; // L'interface définie
-import { SupabaseAuthProvider } from '@/src/provider/SupabaseAuthProvider'; // Implémentation de Supabase
+import { AuthProviderInterface } from '@/src/providers/AuthProviderInterface'; // L'interface définie
+import { SupabaseAuthProvider } from '@/src/providers/SupabaseAuthProvider'; // Implémentation de Supabase
 import { setItem, getItem, removeItem } from '../storage';
 
 // Crée un contexte pour l'authentification
@@ -27,35 +27,28 @@ export const AuthProvider = ({ children }) => {
         if (storedUser && storedToken) {
             const parsedUser = JSON.parse(storedUser); // Parse les données JSON
             setUser(parsedUser);
-            setIsVerified(parsedUser.user_metadata?.email_verified ?? false);
+            setIsVerified(authProvider.verifiedUser(parsedUser));  // Utiliser la méthode générique
 
-            try {
-                // Essayer de configurer Supabase avec le token seulement si il existe
-                await authProvider.setSession(storedToken);
-            } catch (error) {
-                console.error("Error setting session:", error);
-                // Gérer l'erreur ici, par exemple en déconnectant l'utilisateur ou en le redirigeant
-            }
-
+            // Configure Supabase avec le token
+            await authProvider.setSession(storedToken);  // Appel à setSession pour configurer la session
             setLoading(false);
             return;
         }
 
-        const { data, error } = await authProvider.getCurrentUser();
-        if (error) {
-            console.error("Error getting current user:", error);
-        }
-
+        const { data } = await authProvider.getCurrentUser();
         console.log('### AuthProvider :: fetchUser :: data: ', data);
 
         if (data?.user) {
             setUser(data.user);
-            setIsVerified(data.user.user_metadata.email_verified);
+            setIsVerified(authProvider.verifiedUser(data.user));  // Utiliser la méthode générique
 
             const session = await authProvider.getSession();
             if (session?.data?.session?.access_token) {
                 await setItem('token', session?.data?.session?.access_token ?? '');
                 await setItem('user', JSON.stringify(data.user));
+
+                // Configure la session avec le token
+                await authProvider.setSession(session.data.session.access_token, session.data.session?.refresh_token);
             }
         } else {
             setUser(null);
@@ -67,39 +60,38 @@ export const AuthProvider = ({ children }) => {
 
     // Fonction de connexion
     const signIn = async (email, password) => {
-        console.log('### AuthProvider :: signIn :: email:', email);
-        console.log('### AuthProvider :: signIn :: password:', password);
-
         const { data, error } = await authProvider.signIn(email, password);
         if (error) throw error;
 
         setUser(data.user);
-        setIsVerified(data.user.user_metadata.email_verified);
+        setIsVerified(authProvider.verifiedUser(data.user));  // Utiliser la méthode générique
 
-        // Enregistrer les informations nécessaires dans le storage
         if (data.session) {
-            await setItem('authToken', data.session.access_token); // Exemple avec le token
-            await setItem('user', JSON.stringify(data.user)); // Exemple avec l'utilisateur
+            await setItem('authToken', data.session.access_token);
+            await setItem('user', JSON.stringify(data.user));
+
+            // Configure la session avec le token
+            await authProvider.setSession(data.session.access_token, data.session?.refresh_token);
         }
 
-        // Récupérer l'utilisateur après connexion pour garantir que l'état est bien à jour
         fetchUser();
     };
 
-    // Fonction d'inscription
     const signUp = async (email, password) => {
         const { data, error } = await authProvider.signUp(email, password);
         if (error) throw error;
 
         setUser(data.user);
-        setIsVerified(data.user.user_metadata.email_verified);
+        setIsVerified(authProvider.verifiedUser(data.user));  // Utiliser la méthode générique
 
         if (data.session) {
-            await setItem('authToken', data.session.access_token); // Exemple avec le token
-            await setItem('user', JSON.stringify(data.user)); // Exemple avec l'utilisateur
+            await setItem('authToken', data.session.access_token);
+            await setItem('user', JSON.stringify(data.user));
+
+            // Configure la session avec le token
+            await authProvider.setSession(data.session.access_token, data.session?.refresh_token);
         }
 
-        // Récupérer l'utilisateur après connexion pour garantir que l'état est bien à jour
         fetchUser();
         return { data, error };
     };
@@ -120,7 +112,7 @@ export const AuthProvider = ({ children }) => {
             (_, session) => {
                 console.log('### AuthProvider :: session: ', session);
                 setUser(session?.user ?? null);
-                setIsVerified(session?.user?.user_metadata?.email_verified ?? false);
+                setIsVerified(authProvider.verifiedUser(session?.user) ?? false);
             }
         );
 

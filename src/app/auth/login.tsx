@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-// import { useAuth } from '@/src/provider/AuthProvider';  // Utilisation du hook useAuth
+// import { useAuth } from '@/src/providers/AuthProvider';  // Utilisation du hook useAuth
 import { useAuth } from '@/src/context/AuthContext'; // Contexte d'authentification
 
 console.log('### src/app/auth/login.tsx');

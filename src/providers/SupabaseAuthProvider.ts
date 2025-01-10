@@ -24,6 +24,11 @@ export class SupabaseAuthProvider implements AuthProviderInterface {
         return await supabase.auth.getUser();
     }
 
+    // Récupérer les métadonnées utilisateur (ici spécifique à Supabase)
+    verifiedUser(user: any) {
+        return user?.user_metadata?.email_verified;
+    }
+
     // Gérer la session de l'utilisateur avec un token
     // Méthode pour configurer la session utilisateur avec access_token et refresh_token
     async setSession(token: string, refresh_token: string = '') {

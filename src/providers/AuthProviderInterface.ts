@@ -19,4 +19,7 @@ export interface AuthProviderInterface {
 
     // Fonction pour écouter les changements d'état d'authentification
     onAuthStateChange(callback: (event: string, session: any) => void): { unsubscribe: () => void };
+
+    // verifie si l'utilisateur est vérifié
+    verifiedUser(user: any): any;
 }

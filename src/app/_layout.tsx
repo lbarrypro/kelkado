@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Slot, useRouter } from 'expo-router';
 import { useAuth } from '@/src/hooks/useAuth'; // Hook d'authentification
-// import { AuthProvider } from '@/src/provider/AuthProvider'; // Contexte d'authentification
+// import { AuthProvider } from '@/src/providers/AuthProvider'; // Contexte d'authentification
 import { AuthProvider } from '@/src/context/AuthContext'; // Contexte d'authentification
 import { Text, View } from 'react-native'; // Ajoutez Text et View ici
 
