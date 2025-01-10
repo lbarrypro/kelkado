@@ -6,6 +6,8 @@ interface Storage {
 
 const webStorage: Storage = {
     setItem: async (key: string, value: string) => {
+        console.log('### webStorage :: setItem', key, value);
+
         try {
             localStorage.setItem(key, value);
         } catch (error) {
@@ -15,8 +17,13 @@ const webStorage: Storage = {
     },
 
     getItem: async (key: string) => {
+        console.log('### webStorage :: getItem :: key: ', key);
+
         try {
             const value = localStorage.getItem(key);
+
+            console.log('### webStorage :: getItem :: value: ', value);
+
             return value;
         } catch (error) {
             console.error(`Erreur lors de la récupération de la clé ${key}:`, error);
@@ -25,6 +32,8 @@ const webStorage: Storage = {
     },
 
     removeItem: async (key: string) => {
+        console.log('### webStorage :: removeItem :: key: ', key);
+
         try {
             localStorage.removeItem(key);
         } catch (error) {

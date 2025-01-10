@@ -18,14 +18,14 @@ export default function Login() {
     const handleAuth = async () => {
         try {
 
-            console.log('### handleAuth :: isSignup: ', isSignup);
+            console.log('### login :: handleAuth :: isSignup: ', isSignup);
 
             const { data, error } = isSignup
                 ? await signUp(email, password)  // Utilisation de signUp
                 : await signIn(email, password);  // Utilisation de signIn
 
-            console.log('### handleAuth :: data: ', data);
-            console.log('### handleAuth :: error: ', error);
+            console.log('### login :: handleAuth :: data: ', data);
+            console.log('### login :: handleAuth :: error: ', error);
 
             if (error) {
                 setError(error.message);

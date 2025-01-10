@@ -1,24 +1,23 @@
-import React, { useEffect } from 'react';
-import { useRouter } from 'expo-router';
-import { useAuth } from '@/src/hooks/useAuth';
+import React from 'react';
+import { Text } from 'react-native'; // Ajoutez Text et View ici
+import { useAuth } from '@/src/hooks/useAuth'; // Hook d'authentification
+
+console.log('### src/app/index.tsx');
 
 export default function Index() {
     const { user, isVerified, loading } = useAuth();
-    const router = useRouter();
 
-    useEffect(() => {
-        if (!loading) {
-            if (user) {
-                if (isVerified) {
-                    router.replace('/home'); // Page d'accueil
-                } else {
-                    router.replace('/verify-email'); // Page de vérification d'email
-                }
-            } else {
-                router.replace('/auth/login'); // Page de connexion
-            }
-        }
-    }, [user, isVerified, loading, router]);
+    console.log('### index :: User: ', user);
+    console.log('### index :: Is Verified: ', isVerified);
+    console.log('### index :: loading: ', loading);
 
-    return null; // Pas d'affichage ici, juste la logique de redirection
+    if (loading) {
+        // Afficher un écran de chargement pendant l'initialisation
+        return <Text>Chargement...</Text>;
+    }
+
+    // Sinon, tu peux afficher le contenu de la page d'accueil (ou autre)
+    return (
+        <Text>Bienvenue sur l'index</Text>
+    );
 }
