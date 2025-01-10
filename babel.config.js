@@ -1,6 +1,13 @@
 module.exports = function (api) {
 	api.cache(true);
 
+	const envFile =
+		process.env.APP_ENV === 'production'
+			? '.env.production'
+			: process.env.APP_ENV === 'staging'
+				? '.env.staging'
+				: '.env.development'; // Par défaut, développement.
+
 	return {
 		presets: ['babel-preset-expo'],
 		plugins: [
@@ -20,9 +27,14 @@ module.exports = function (api) {
 				},
 			],
 			[
-				'inline-dotenv',
+				'module:react-native-dotenv',
 				{
-					path: '.env.development',
+					moduleName: '@env',
+					path: envFile, // Charge dynamiquement le fichier `.env`
+					blacklist: null,
+					whitelist: null,
+					safe: false,
+					allowUndefined: true,
 				},
 			],
 		],
