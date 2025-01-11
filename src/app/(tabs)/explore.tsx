@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput } from 'react-native';
+import logger from '@/src/utils/logger';  // Import de ton logger personnalisé
 
 export default function ExploreScreen() {
     const [items, setItems] = useState(
@@ -13,18 +14,28 @@ export default function ExploreScreen() {
 
     // Fonction simulant le lazy loading
     const loadMoreItems = () => {
+        logger.debug('Chargement de nouveaux items...');
         const newItems = Array.from({ length: 10 }, (_, i) => ({
             id: `${items.length + i + 1}`,
             title: `Item ${items.length + i + 1}`,
             image: 'https://via.placeholder.com/100',
         }));
         setItems((prevItems) => [...prevItems, ...newItems]);
+        logger.debug('Items après chargement:', { items: [...items, ...newItems] });
     };
 
     // Filtrage des items en fonction de la recherche
-    const filteredItems = items.filter((item) =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredItems = items.filter((item) => {
+        const match = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+        logger.debug(`Filtrage de l'élément "${item.title}": ${match ? 'Correspond' : 'Ne correspond pas'}`);
+        return match;
+    });
+
+    // Log quand la recherche change
+    const handleSearchChange = (text: string) => {
+        logger.debug('Recherche modifiée:', { searchQuery: text });
+        setSearchQuery(text);
+    };
 
     return (
         <View style={styles.container}>
@@ -35,7 +46,7 @@ export default function ExploreScreen() {
                     placeholder="Search items..."
                     placeholderTextColor="#888"
                     value={searchQuery}
-                    onChangeText={(text) => setSearchQuery(text)}
+                    onChangeText={handleSearchChange}
                 />
             </View>
 

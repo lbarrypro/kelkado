@@ -31,11 +31,20 @@ const customLevels = {
 
 // Configurer le logger avec les niveaux et couleurs personnalisées
 const log = logger.createLogger({
-    levels: customLevels.levels,
-    severity: "debug",
+    levels: {
+        debug: 0,
+        info: 1,
+        warn: 2,
+        error: 3,
+    },
+    severity: process.env.LOG_LEVEL || 'debug',
     transport: consoleTransport,
     transportOptions: {
-        colors: customLevels.colors,
+        colors: {
+            info: "blue",
+            warn: "yellow",
+            error: "red",
+        }
     },
     async: true,
     dateFormat: "time",
@@ -48,17 +57,21 @@ const log = logger.createLogger({
 // Créer une fonction pour enregistrer avec le fichier appelant
 const logWithFile = (level: string, message: string, ...args: any[]) => {
     const callerFile = getCallerFile(); // Obtenir le fichier appelant
-    log[level](`${message} (from ${callerFile})`, ...args);
+
+    // Utilise `keyof typeof log` pour garantir que `level` est une clé valide de `log`
+    if (level in log) {
+        log[level as keyof typeof log](`${message} (from ${callerFile})`, ...args);
+    } else {
+        console.warn(`Niveau de log invalide : ${level}`);
+    }
 };
 
-// Exposer les méthodes de log
-export const logInfo = (message: string, ...args: any[]) => logWithFile('info', message, ...args);
-export const logWarning = (message: string, ...args: any[]) => logWithFile('warn', message, ...args);
-export const logError = (message: string, ...args: any[]) => logWithFile('error', message, ...args);
+// Exposer directement les niveaux de log comme un objet
+const loggerInstance = {
+    info: (message: string, ...args: any[]) => logWithFile('info', message, ...args),
+    warn: (message: string, ...args: any[]) => logWithFile('warn', message, ...args),
+    error: (message: string, ...args: any[]) => logWithFile('error', message, ...args),
+    debug: (message: string, ...args: any[]) => logWithFile('debug', message, ...args),
+};
 
-// Exposition directe des méthodes info, warn, error
-export const info = (message: string, ...args: any[]) => logWithFile('info', message, ...args);
-export const warning = (message: string, ...args: any[]) => logWithFile('warn', message, ...args);
-export const error = (message: string, ...args: any[]) => logWithFile('error', message, ...args);
-
-export default log;
+export default loggerInstance;

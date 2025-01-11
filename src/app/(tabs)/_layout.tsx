@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Tabs, useRouter } from 'expo-router';  // Assure-toi que tu utilises le bon hook pour la navigation
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '@/src/context/AuthContext';  // Le contexte pour récupérer l'utilisateur
+import logger from '@/src/utils/logger';  // Import de ton logger personnalisé
 
 export default function TabLayout() {
     const { user } = useAuth();  // Utiliser useContext pour récupérer l'utilisateur
@@ -9,17 +10,25 @@ export default function TabLayout() {
     const [isReady, setIsReady] = useState(false);  // État pour suivre la disponibilité du layout
 
     useEffect(() => {
+        // Log à chaque fois que le layout est prêt ou que l'utilisateur change
+        logger.debug('Layout ready:', { isReady });
+        logger.debug('Current user:', { user });
+
         // S'assurer que le layout est monté avant de naviguer
         if (!isReady) return;
 
         if (user === null) {
+            logger.warn('Utilisateur non connecté, redirection vers la page d\'accueil');
             // Si l'utilisateur n'est pas connecté, rediriger vers la page d'accueil
             router.push('/');  // Rediriger vers la page de connexion ou d'accueil
+        } else {
+            logger.info('Utilisateur connecté:', { email: user.email });  // Log l'email de l'utilisateur si connecté
         }
     }, [user, isReady, router]);
 
     useEffect(() => {
         // Quand le composant est monté, on met à jour l'état pour signaler que le layout est prêt
+        logger.debug('TabLayout monté, mise à jour de l\'état de readiness');
         setIsReady(true);
     }, []);
 
