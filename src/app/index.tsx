@@ -1,15 +1,9 @@
 import React from 'react';
 import { Text } from 'react-native'; // Ajoutez Text et View ici
-import { useAuth } from '@/src/hooks/useAuth'; // Hook d'authentification
-
-console.log('### src/app/index.tsx');
+import { useAuth } from '@/src/context/AuthContext'; // Contexte d'authentification
 
 export default function Index() {
     const { user, isVerified, loading } = useAuth();
-
-    console.log('### index :: User: ', user);
-    console.log('### index :: Is Verified: ', isVerified);
-    console.log('### index :: loading: ', loading);
 
     if (loading) {
         // Afficher un écran de chargement pendant l'initialisation

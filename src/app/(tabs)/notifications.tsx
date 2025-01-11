@@ -1,7 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-console.log('### src/app/(tabs)/notifications.tsx');
-
 export default function NotificationsScreen() {
     return (
         <View style={styles.container}>

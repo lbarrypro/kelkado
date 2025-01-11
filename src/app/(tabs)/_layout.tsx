@@ -1,23 +1,27 @@
-import React, { useEffect } from 'react';
-import { Tabs, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Tabs, useRouter } from 'expo-router';  // Assure-toi que tu utilises le bon hook pour la navigation
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useAuth } from '@/src/hooks/useAuth';  // Le hook d'authentification
-
-console.log('### src/app/(tabs)/_layout');
+import { useAuth } from '@/src/context/AuthContext';  // Le contexte pour récupérer l'utilisateur
 
 export default function TabLayout() {
-    const user = useAuth();  // Récupérer l'utilisateur connecté
-
-    console.log('### TabLayout :: user: ', user);
-
+    const { user } = useAuth();  // Utiliser useContext pour récupérer l'utilisateur
     const router = useRouter();
+    const [isReady, setIsReady] = useState(false);  // État pour suivre la disponibilité du layout
 
     useEffect(() => {
+        // S'assurer que le layout est monté avant de naviguer
+        if (!isReady) return;
+
         if (user === null) {
             // Si l'utilisateur n'est pas connecté, rediriger vers la page d'accueil
             router.push('/');  // Rediriger vers la page de connexion ou d'accueil
         }
-    }, [user, router]);
+    }, [user, isReady, router]);
+
+    useEffect(() => {
+        // Quand le composant est monté, on met à jour l'état pour signaler que le layout est prêt
+        setIsReady(true);
+    }, []);
 
     return (
         <Tabs

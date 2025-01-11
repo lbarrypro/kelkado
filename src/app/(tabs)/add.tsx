@@ -1,8 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-console.log('### src/app/(tabs)/add.tsx');
-
 export default function AddScreen() {
     return (
         <View style={styles.container}>

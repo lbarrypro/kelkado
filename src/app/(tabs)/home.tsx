@@ -1,8 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 
-console.log('### src/app/(tabs)/home.tsx');
-
 export default function HomeScreen() {
     // Exemple de données statiques
     const feedItems = [

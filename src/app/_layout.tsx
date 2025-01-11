@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Slot, useRouter } from 'expo-router';
-import { useAuth } from '@/src/hooks/useAuth'; // Hook d'authentification
-// import { AuthProvider } from '@/src/providers/AuthProvider'; // Contexte d'authentification
-import { AuthProvider } from '@/src/context/AuthContext'; // Contexte d'authentification
+import { AuthProvider, useAuth } from '@/src/context/AuthContext'; // Contexte d'authentification
 import { Text, View } from 'react-native'; // Ajoutez Text et View ici
-
-console.log('### src/app/_layout');
 
 export default function RootLayout() {
     return (
@@ -21,20 +17,12 @@ function AuthenticatedLayout() {
     const router = useRouter();
     const [isMounted, setIsMounted] = useState(false); // Ajouter un état pour vérifier si le composant est monté
 
-    console.log('### AuthenticatedLayout :: User: ', user);
-    console.log('### AuthenticatedLayout :: isVerified: ', isVerified);
-    console.log('### AuthenticatedLayout :: loading: ', loading);
-
     useEffect(() => {
         // Marquer le composant comme monté après le premier rendu
         setIsMounted(true);
     }, []);
 
     useEffect(() => {
-        console.log('### AuthenticatedLayout :: useEffect :: User: ', user);
-        console.log('### AuthenticatedLayout :: useEffect :: isVerified: ', isVerified);
-        console.log('### AuthenticatedLayout :: useEffect :: loading: ', loading);
-
         // Vérifier si le composant est monté avant de procéder à la redirection
         if (isMounted && !loading) {
             if (!user) {

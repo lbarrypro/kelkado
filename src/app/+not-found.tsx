@@ -5,8 +5,6 @@ import { ThemedText } from '@/src/components/ThemedText';
 import { ThemedView } from '@/src/components/ThemedView';
 import React from 'react';
 
-console.log('### src/app/+not-found.tsx');
-
 export default function NotFoundScreen() {
   return (
     <>

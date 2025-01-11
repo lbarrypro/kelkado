@@ -1,26 +1,25 @@
 import React, { useState } from 'react';
 import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
-import { supabase } from '@/src/utils/supabaseClient';
+import { useAuth } from '@/src/context/AuthContext'; // Importation du hook personnalisé
+import logger from '@/src/utils/logger';
 
 export default function VerifyEmail() {
+    const { authProvider } = useAuth(); // Utilisation du hook personnalisé
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
     const handleResendEmail = async () => {
         try {
-            const { error } = await supabase.auth.resend({
-                type: 'signup', // Déclarez le type comme "signup"
-                email,
-            });
+            logger.info(`Tentative de renvoi d'email de confirmation à ${email}`);
 
-            if (error) {
-                setError(error.message);
-            } else {
-                setMessage('Email de confirmation renvoyé. Veuillez vérifier votre boîte de réception.');
-            }
+            await authProvider.resendConfirmationEmail(email); // Appel de la méthode abstraite
+
+            setMessage('Email de confirmation renvoyé. Veuillez vérifier votre boîte de réception.');
+            logger.info('Email de confirmation renvoyé avec succès');
         } catch (err) {
             setError('Une erreur est survenue lors de l\'envoi de l\'email.');
+            logger.error('Une erreur est survenue dans handleResendEmail', err);
         }
     };
 

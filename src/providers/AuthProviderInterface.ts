@@ -22,4 +22,6 @@ export interface AuthProviderInterface {
 
     // verifie si l'utilisateur est vérifié
     verifiedUser(user: any): any;
+
+    resendConfirmationEmail(email: string): Promise<void>;
 }
