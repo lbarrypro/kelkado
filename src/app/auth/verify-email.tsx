@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
 import { useAuth } from '@/src/context/AuthContext'; // Importation du hook personnalisé
 import logger from '@/src/utils/logger';

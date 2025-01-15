@@ -9,11 +9,8 @@
     "android": "npx expo start --android",
     "ios": "npx expo start --ios",
     "web": "NODE_ENV=development EXPO_ROUTER_APP_ROOT=./src/app EXPO_ROUTER_IMPORT_MODE=sync EXPO_OS=web npx expo start -c --web",
-    "test": "jest --watchAll",
+    "test": "cross-env DOTENV_CONFIG=.env.development jest --watchAll",
     "lint": "npx expo lint"
-  },
-  "jest": {
-    "preset": "jest-expo"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
@@ -23,6 +20,8 @@
     "@react-navigation/stack": "^7.1.1",
     "@rneui/themed": "^4.0.0-rc.8",
     "@supabase/supabase-js": "^2.47.10",
+    "@testing-library/react-native": "^13.0.0",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.7",
     "expo": "~52.0.23",
     "expo-blur": "~14.0.1",

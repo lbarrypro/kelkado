@@ -5,30 +5,31 @@ import { useAuth } from '@/src/context/AuthContext';  // Le contexte pour récup
 import logger from '@/src/utils/logger';  // Import de ton logger personnalisé
 
 export default function TabLayout() {
-    const { user } = useAuth();  // Utiliser useContext pour récupérer l'utilisateur
+    const { user, isVerified } = useAuth();  // Utiliser useContext pour récupérer l'utilisateur
     const router = useRouter();
     const [isReady, setIsReady] = useState(false);  // État pour suivre la disponibilité du layout
 
     useEffect(() => {
         // Log à chaque fois que le layout est prêt ou que l'utilisateur change
-        logger.debug('Layout ready:', { isReady });
-        logger.debug('Current user:', { user });
+        logger.info('app/(tabs)/_layout :: useEffect', { isReady, user, isVerified });
 
         // S'assurer que le layout est monté avant de naviguer
         if (!isReady) return;
 
         if (user === null) {
-            logger.warn('Utilisateur non connecté, redirection vers la page d\'accueil');
+            logger.warn('app/(tabs)/_layout :: useEffect :: Utilisateur non connecté, redirection vers la page d\'accueil');
             // Si l'utilisateur n'est pas connecté, rediriger vers la page d'accueil
             router.push('/');  // Rediriger vers la page de connexion ou d'accueil
+        } else if (user && !isVerified) {
+            logger.info('app/(tabs)/_layout :: useEffect :: Utilisateur non vérifié:', { email: user.email });  // Log l'email de l'utilisateur si connecté
         } else {
-            logger.info('Utilisateur connecté:', { email: user.email });  // Log l'email de l'utilisateur si connecté
+            logger.info('app/(tabs)/_layout :: useEffect :: Utilisateur connecté:', { email: user.email });  // Log l'email de l'utilisateur si connecté
         }
     }, [user, isReady, router]);
 
     useEffect(() => {
         // Quand le composant est monté, on met à jour l'état pour signaler que le layout est prêt
-        logger.debug('TabLayout monté, mise à jour de l\'état de readiness');
+        logger.debug('app/(tabs)/_layout :: useEffect :: TabLayout monté, mise à jour de l\'état de readiness');
         setIsReady(true);
     }, []);
 

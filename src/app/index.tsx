@@ -9,22 +9,22 @@ export default function Index() {
     useEffect(() => {
         // Log lors du changement de l'état de chargement
         if (loading) {
-            logger.info('Chargement en cours...');
+            logger.info('Index :: Chargement en cours...');
         } else {
-            logger.info('Chargement terminé');
+            logger.info('Index :: Chargement terminé');
         }
 
         // Log de l'utilisateur et de sa vérification
         if (user) {
-            logger.info('Utilisateur connecté :', { user });
+            logger.info('Index :: Utilisateur connecté :', { user });
         } else {
-            logger.warn('Aucun utilisateur connecté');
+            logger.warn('Index :: Aucun utilisateur connecté');
         }
 
         if (isVerified) {
-            logger.info('Utilisateur vérifié');
+            logger.info('Index :: Utilisateur vérifié');
         } else {
-            logger.info('Utilisateur non vérifié');
+            logger.info('Index :: Utilisateur non vérifié');
         }
     }, [loading, user, isVerified]);
 

@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { AuthProviderInterface } from '@/src/providers/AuthProviderInterface'; // L'interface définie
 import { SupabaseAuthProvider } from '@/src/providers/SupabaseAuthProvider'; // Implémentation de Supabase
-import { setItem, getItem, removeItem } from '../storage';
-import logger from '@/src/utils/logger'; // Importer le logger
+import logger from '@/src/utils/logger';
 
 // Définir l'interface pour l'utilisateur
 interface User {
     id: string;
     name: string;
+    email: string;
     verified: boolean;
 }
 
@@ -34,144 +34,176 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Initialisation du fournisseur d'authentification dans un useEffect
     useEffect(() => {
-        logger.debug('Initialisation du fournisseur d\'authentification');
+        logger.debug('AuthProvider :: Initialisation du fournisseur d\'authentification');
         const provider = new SupabaseAuthProvider();
         setAuthProvider(provider);
-        logger.debug('Fournisseur d\'authentification initialisé');
+        logger.debug('AuthProvider :: Fournisseur d\'authentification initialisé');
     }, []); // Ce useEffect s'exécute une seule fois lors du premier rendu
 
-    // Fonction pour obtenir l'utilisateur actuel de Supabase
-    const fetchUser = async () => {
-        if (!authProvider) {
-            logger.warn('Le fournisseur d\'authentification n\'est pas défini');
-            return; // Vérifie si authProvider est défini
-        }
-
-        logger.debug('Tentative de récupération des informations utilisateur depuis le stockage');
-        const storedUser = await getItem('user');
-        const storedToken = await getItem('access_token');
-        const storedRefreshToken = await getItem('refresh_token'); // Récupérer le refresh token
-
-        if (storedUser && storedToken && storedRefreshToken) {
-            const parsedUser = JSON.parse(storedUser); // Parse les données JSON
-            setUser(parsedUser);
-            setIsVerified(authProvider.verifiedUser(parsedUser));  // Utiliser la méthode générique
-
-            // Vérifier si le token et le refresh token existent avant de définir la session
-            if (storedToken && storedRefreshToken) {
-                logger.debug('Token trouvé, configuration de la session');
-                await authProvider.setSession(storedToken, storedRefreshToken);  // Appel à setSession avec access et refresh token
-                setLoading(false);
-                return;
-            } else {
-                setLoading(false);
-                logger.error('Token d\'authentification ou refresh token manquant');
+    // Fonction de connexion (signIn)
+    const signIn = async (email: string, password: string) => {
+        try {
+            if (!authProvider) {
+                throw new Error('AuthProvider :: signIn :: Auth provider not available');
             }
-        } else {
-            // Si les données sont absentes, gérer l'absence de session
-            logger.warn('Aucune session trouvée dans le stockage local');
+
+            logger.debug('AuthProvider :: signIn :: Tentative de connexion avec:', { email });
+
+            return await authProvider.signIn(email, password);
+            /*
+            const { data, error } = await authProvider.signIn(email, password);
+
+            if (error) {
+                return { data: null, error }; // Retourne l'erreur
+            }
+
+            if (!data?.user) {
+                return { data: null, error: new Error('Utilisateur non trouvé') };
+            }
+
+            const verifiedUser = authProvider.verifiedUser(data.user);
+            if (!verifiedUser) {
+                return { data: null, error: new Error('Email non vérifié') };
+            }
+
+            setUser(data.user);
+            setIsVerified(verifiedUser);
+
+            await authProvider.setSession(data.session?.access_token, data.session?.refresh_token);
+
+            logger.info('AuthProvider :: signIn :: Utilisateur connecté');
+            return { data, error: null }; // Retourne les données en cas de succès
+            */
+        } catch (error: any) {
+            logger.error('AuthProvider :: signIn :: Erreur pendant la connexion:', error);
+            return { data: null, error }; // Retourne l'erreur capturée
+        }
+    };
+
+    // Fonction d'inscription (signUp)
+    const signUp = async (email: string, password: string) => {
+        try {
+            if (!authProvider) {
+                throw new Error('AuthProvider :: signUp :: Auth provider not available');
+            }
+
+            logger.debug('AuthProvider :: signUp :: Tentative d\'inscription avec:', { email });
+
+            return await authProvider.signUp(email, password);
+
+            /*
+            const { data, error } = await authProvider.signUp(email, password);
+
+            if (data?.user) {
+                setUser(data.user);
+                setIsVerified(authProvider.verifiedUser(data.user));
+
+                logger.info('AuthProvider :: signUp :: Session configurée');
+            }
+
+            if (data?.session?.access_token && data?.session?.refresh_token) {
+                // Sauvegarder la session après la création de l'utilisateur
+                await authProvider.setSession(data.session?.access_token, data.session?.refresh_token);
+            }
+
+            return { data, error };
+             */
+        } catch (error) {
+            logger.error('AuthProvider :: signUp :: Error during signUp:', error);
+        }
+    };
+
+    // Fonction de déconnexion (signOut)
+    const signOut = async () => {
+        try {
+            if (!authProvider) {
+                throw new Error('AuthProvider :: signOut :: Auth provider not available');
+            }
+
+            logger.debug('AuthProvider :: signOut :: Déconnexion en cours...');
+            await authProvider.signOut();
             setUser(null);
             setIsVerified(false);
-            setLoading(false);
+
+            // Supprimer les données locales de session
+            logger.debug('AuthProvider :: signOut :: Déconnexion effectuée, session supprimée');
+        } catch (error) {
+            logger.error('AuthProvider :: signOut :: Error during signOut:', error);
         }
     };
 
-    // Fonction de connexion
-    const signIn = async (email: string, password: string) => {
-        if (!authProvider) {
-            logger.error('Auth provider not available');
-            throw new Error('Auth provider not available');
-        }
-
-        logger.debug('Tentative de connexion avec:', { email });
-        const { data, error } = await authProvider.signIn(email, password);
-        if (error) {
-            logger.error('Erreur lors de la connexion:', error);
-            throw error;
-        }
-
-        setUser(data.user);
-        setIsVerified(authProvider.verifiedUser(data.user));  // Utiliser la méthode générique
-
-        if (data.session?.access_token && data.session?.refresh_token) {
-            logger.debug('Tokens reçus, stockage des données utilisateur');
-            await setItem('access_token', data.session.access_token);
-            await setItem('refresh_token', data.session.refresh_token);
-            await setItem('user', JSON.stringify(data.user));
-
-            // Configure la session après l'obtention du token
-            await authProvider.setSession(data.session.access_token, data.session?.refresh_token);
-            fetchUser();
-        }
-    };
-
-    const signUp = async (email: string, password: string) => {
-        if (!authProvider) {
-            logger.error('Auth provider not available');
-            throw new Error('Auth provider not available');
-        }
-
-        logger.debug('Tentative d\'inscription avec:', { email });
-        const { data, error } = await authProvider.signUp(email, password);
-        if (error) {
-            logger.error('Erreur lors de l\'inscription:', error);
-            throw error;
-        }
-
-        setUser(data.user);
-        setIsVerified(authProvider.verifiedUser(data.user));  // Utiliser la méthode générique
-
-        if (data.session?.access_token && data.session?.refresh_token) {
-            logger.debug('Tokens reçus, stockage des données utilisateur');
-            await setItem('access_token', data.session.access_token);
-            await setItem('refresh_token', data.session.refresh_token);
-            await setItem('user', JSON.stringify(data.user));
-
-            // Configure la session avec le token
-            await authProvider.setSession(data.session.access_token, data.session?.refresh_token);
-        }
-
-        fetchUser();
-        return { data, error };
-    };
-
-    // Fonction de déconnexion
-    const signOut = async () => {
-        if (!authProvider) {
-            logger.error('Auth provider not available');
-            throw new Error('Auth provider not available');
-        }
-
-        logger.debug('Déconnexion en cours...');
-        await authProvider.signOut();
-        setUser(null);
-        setIsVerified(false);
-        await removeItem('authToken');
-        await removeItem('user');
-        logger.debug('Déconnexion effectuée, session supprimée');
-    };
-
-    // Récupérer l'utilisateur actuel lors du montage du composant
+    // Remplacement dans le useEffect :
     useEffect(() => {
-        if (!authProvider) return; // Assure que authProvider est défini
+        if (!authProvider) {
+            logger.error('AuthProvider :: useEffect :: authProvider non défini');
+            setLoading(false); // On arrête le chargement même si authProvider est manquant
+            return;
+        }
 
-        logger.debug('Montée du composant, récupération des informations utilisateur');
-        fetchUser();
-        const { data: listener } = authProvider.onAuthStateChange(
-            (_, session) => {
-                setUser(session?.user ?? null);
-                setIsVerified(authProvider.verifiedUser(session?.user) ?? false);
-                logger.debug('Changement d\'état de l\'authentification:', { user: session?.user, isVerified: session?.user ? authProvider.verifiedUser(session?.user) : false });
-            }
-        );
+        const fetchInitialSession = async () => {
+            try {
+                logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Début');
 
-        return () => {
-            if (listener?.unsubscribe) {
-                logger.debug('Désinscription du listener');
-                listener?.unsubscribe();
+                const session = await authProvider.getSession(); // Appel au provider
+                logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Session récupérée:', session);
+
+                if (session?.user) {
+                    setUser(session.user);
+                    setIsVerified(authProvider.verifiedUser(session.user));
+                    logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Utilisateur défini:', session.user);
+                } else {
+                    setUser(null);
+                    setIsVerified(false);
+                    logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Aucun utilisateur trouvé');
+                }
+            } catch (error) {
+                logger.error('AuthProvider :: useEffect :: fetchInitialSession :: Error:', error);
+            } finally {
+                logger.debug('AuthProvider :: useEffect :: fetchInitialSession ::  Fin du chargement');
+                setLoading(false); // Important pour signaler la fin de l'initialisation
             }
         };
-    }, [authProvider]); // Ajoute authProvider en dépendance
+
+        fetchInitialSession();
+
+        const { data: listener } = authProvider.onAuthStateChange(async (event, session) => {
+            logger.debug('Événement auth:', { event, session });
+
+            switch (event) {
+                case 'INITIAL_SESSION':
+                    if (session?.user) {
+                        setUser(session.user);
+                        setIsVerified(authProvider.verifiedUser(session.user));
+                        logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: SIGNED_IN :: setIsVerified: ', authProvider.verifiedUser(session.user));
+                    }
+                    break;
+
+                case 'SIGNED_IN':
+                    if (session?.user) {
+                        setUser(session.user);
+                        setIsVerified(authProvider.verifiedUser(session.user));
+                        logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: SIGNED_IN :: setIsVerified: ', authProvider.verifiedUser(session.user));
+                    }
+                    break;
+
+                case 'TOKEN_REFRESHED':
+                    setUser(session?.user ?? null);
+                    await authProvider.setSession(session?.access_token, session?.refresh_token);
+                    break;
+
+                case 'SIGNED_OUT':
+                    setUser(null);
+                    setIsVerified(false);
+                    // await authProvider.setSession(null, null);
+                    break;
+
+                default:
+                    logger.warn('Événement auth inconnu:', event);
+            }
+        });
+
+        return () => listener?.unsubscribe();
+    }, [authProvider]);
 
     return (
         <AuthContext.Provider value={{ authProvider: authProvider!, signIn, signUp, signOut, user, isVerified, loading }}>
@@ -184,8 +216,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
     if (!context) {
-        logger.error('useAuth must be used within an AuthProvider');
-        throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error('AuthProvider :: useAuth must be used within an AuthProvider');
     }
     return context;
 };

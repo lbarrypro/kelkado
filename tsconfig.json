@@ -2,17 +2,26 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "jsx": "react",   // Ajoute cette ligne pour permettre à TypeScript de gérer JSX
+    "jsx": "react",
     "paths": {
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "types": ["jest"],  // Ajoute Jest dans les types globaux
+    "typeRoots": ["./node_modules/@types", "./@types"],
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",    // Exclut les modules node
+    "build",           // Si tu as un dossier de build
+    "dist"             // Si tu génères un dossier dist
   ]
 }

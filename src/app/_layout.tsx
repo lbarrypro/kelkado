@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Slot, useRouter } from 'expo-router';
 import { AuthProvider, useAuth } from '@/src/context/AuthContext'; // Contexte d'authentification
+import { UserProfilesProvider } from '@/src/context/UserProfilesContext'; // Contexte pour les profils utilisateurs
 import { Text, View } from 'react-native'; // Ajoutez Text et View ici
 import logger from '@/src/utils/logger'; // Importer le logger
 
 export default function RootLayout() {
     return (
-        // AuthProvider doit envelopper le composant Slot et tout autre contenu
+        // AuthProvider doit envelopper tout le contenu
         <AuthProvider>
-            <AuthenticatedLayout />
+            <UserProfilesProvider>
+                <AuthenticatedLayout />
+            </UserProfilesProvider>
         </AuthProvider>
     );
 }
+
 
 function AuthenticatedLayout() {
     const { user, isVerified, loading } = useAuth(); // Hook pour accéder à l'utilisateur et son état de vérification
@@ -25,21 +29,21 @@ function AuthenticatedLayout() {
 
     useEffect(() => {
         // Ajouter des logs pour suivre l'état des données utilisateur et de la redirection
-        logger.debug('Vérification des états de l\'utilisateur:', { user, isVerified, loading });
+        logger.debug('app/_layout :: Vérification des états de l\'utilisateur:', { user, isVerified, loading });
 
         // Vérifier si le composant est monté avant de procéder à la redirection
         if (isMounted && !loading) {
             if (!user) {
                 // Rediriger vers la page de connexion si l'utilisateur n'est pas authentifié
-                logger.info('Utilisateur non authentifié, redirection vers la page de connexion');
+                logger.info('app/_layout :: Utilisateur non authentifié, redirection vers la page de connexion');
                 router.replace('/auth/login');
             } else if (user && !isVerified) {
                 // Si l'utilisateur est connecté mais non vérifié, rediriger vers la page de vérification d'email
-                logger.info('Utilisateur connecté mais non vérifié, redirection vers la page de vérification d\'email');
+                logger.info('app/_layout :: Utilisateur connecté mais non vérifié, redirection vers la page de vérification d\'email');
                 router.replace('/auth/verify-email');
             } else if (user && isVerified) {
                 // Si l'utilisateur est connecté et vérifié, rediriger vers la page d\'accueil
-                logger.info('Utilisateur connecté et vérifié, redirection vers la page d\'accueil');
+                logger.info('app/_layout :: Utilisateur connecté et vérifié, redirection vers la page d\'accueil');
                 router.replace('/home');
             }
         }
@@ -47,7 +51,7 @@ function AuthenticatedLayout() {
 
     // Log lors du chargement
     if (loading) {
-        logger.debug('L\'application est en cours de chargement...');
+        logger.debug('app/_layout :: L\'application est en cours de chargement...');
         return <LoadingScreen />;
     }
 

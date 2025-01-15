@@ -1,40 +1,89 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-import { router } from "expo-router";
+import { useRouter } from 'expo-router';
+import { useAuth } from '@/src/context/AuthContext';
+import { useUserProfiles } from '@/src/context/UserProfilesContext'; // Assurez-vous que ce hook est correctement implémenté
+import logger from '@/src/utils/logger';
 
 export default function ProfileScreen() {
-    // Exemple de données utilisateur
-    const user = {
-        profileImage: 'https://via.placeholder.com/100', // Remplace avec une vraie URL
-        username: 'john_doe',
-        followers: 1200,
-        following: 340,
+    const [error, setError] = useState<string | null>(null);
+    const [userData, setUserData] = useState<any>(null); // Contiendra les données de l'utilisateur
+    const [userLists, setUserLists] = useState<any[]>([]); // Contiendra les listes de l'utilisateur
+    const router = useRouter();
+
+    const { user: authUser, signOut } = useAuth(); // Récupère l'utilisateur authentifié
+    const { getProfile } = useUserProfiles(); // Assure-toi que `getProfile` est disponible dans ton contexte
+
+    // Fonction de déconnexion (signout)
+    const handleSignOut = async () => {
+        try {
+            await signOut();
+        } catch (err) {
+            logger.error('Error during sign out: ', err);
+        }
     };
 
-    // Exemple de listes de l'utilisateur
-    const userLists = [
-        { id: '1', title: 'Wish List' },
-        { id: '2', title: 'Travel Goals' },
-        { id: '3', title: 'Books to Read' },
-    ];
+    // Récupérer les données de l'utilisateur et de son profil
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                if (!authUser) {
+                    throw new Error('User not authenticated');
+                }
+
+                /*
+                // Récupérer les données du profil utilisateur
+                const profileData = await getProfile(authUser.id);
+                if (profileData) {
+                    setUserData(profileData); // Stocke les données du profil
+                }
+                */
+
+                // Exemple de récupération des listes utilisateur (à ajuster selon ta structure de base de données)
+                // Tu pourrais ajouter une méthode pour récupérer les listes si nécessaire
+                // const listsData = await getUserLists(authUser.id);
+                // setUserLists(listsData);
+
+            } catch (err) {
+                setError('Erreur lors de la récupération des données utilisateur');
+                logger.error('Error fetching user data: ', err);
+            }
+        };
+
+        fetchUserData();
+    }, [authUser, getProfile]);
+
+    // Si les données sont en cours de récupération ou s'il y a une erreur
+    /*
+    if (!userData || error) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.errorText}>{error || 'Loading user data...'}</Text>
+            </View>
+        );
+    }
+    */
 
     return (
         <View style={styles.container}>
             {/* Header */}
+
+            {/*
             <View style={styles.header}>
-                <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
+                <Image source={{ uri: userData.profileImage }} style={styles.profileImage} />
                 <View style={styles.userInfo}>
-                    <Text style={styles.username}>{user.username}</Text>
+                    <Text style={styles.username}>{userData.username}</Text>
                     <View style={styles.stats}>
                         <Text style={styles.statItem}>
-                            <Text style={styles.statNumber}>{user.followers}</Text> Followers
+                            <Text style={styles.statNumber}>{userData.followers}</Text> Followers
                         </Text>
                         <Text style={styles.statItem}>
-                            <Text style={styles.statNumber}>{user.following}</Text> Following
+                            <Text style={styles.statNumber}>{userData.following}</Text> Following
                         </Text>
                     </View>
                 </View>
             </View>
+            */}
 
             {/* Menu */}
             <View style={styles.menu}>
@@ -44,12 +93,15 @@ export default function ProfileScreen() {
                 <TouchableOpacity style={styles.primaryButton}>
                     <Text style={styles.primaryButtonText}>+ Create New List</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.secondaryButton} onPress={handleSignOut}>
+                    <Text style={styles.secondaryButtonText}>Sign Out</Text>
+                </TouchableOpacity>
             </View>
 
             {/* Listes */}
             <View style={styles.listsContainer}>
                 <FlatList
-                    data={userLists}
+                    data={userLists} // Utilise ici les listes récupérées si nécessaire
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <TouchableOpacity
@@ -130,6 +182,17 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
     },
+    secondaryButton: {
+        backgroundColor: '#ff4d4d',  // Un rouge pour le bouton 'Sign Out'
+        borderRadius: 5,
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+    },
+    secondaryButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
     listsContainer: {
         flex: 1,
         paddingHorizontal: 16,
@@ -147,6 +210,11 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         color: '#aaa',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    errorText: {
+        color: 'red',
         textAlign: 'center',
         marginTop: 20,
     },

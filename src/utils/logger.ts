@@ -1,12 +1,26 @@
 import { logger, consoleTransport } from "react-native-logs";
 
 // Fonction pour obtenir le fichier appelant sans utiliser path
-function getCallerFile(): string {
+function getCallerInfo(): string {
     const stack = new Error().stack || '';
     const stackLines = stack.split('\n');
-    const callerLine = stackLines[3] || ''; // Ligne contenant l'appel du logger
-    const match = callerLine.match(/\((.*):\d+:\d+\)$/); // Extraire le chemin du fichier
-    return match ? match[1] : 'unknown';
+    const callerLine = stackLines[3] || ''; // Ligne correspondant à l'appel du logger
+
+    // Extraire la fonction appelante
+    const functionMatch = callerLine.match(/at ([^(]+) \(/); // Extrait le nom avant '('
+    const func = functionMatch ? functionMatch[1].trim() : 'unknown function';
+
+    // Extraire le fichier appelant
+    const fileMatch = callerLine.match(/\((.*):\d+:\d+\)$/) || callerLine.match(/at (.*):\d+:\d+$/); // Fichier ou URL
+    let filePath = fileMatch ? fileMatch[1] : 'unknown file';
+
+    // Rendre le chemin relatif pour les URL locales
+    if (filePath.includes('http')) {
+        const parts = filePath.split('/');
+        filePath = parts.slice(-2).join('/'); // Garde les deux derniers segments (ex: src/app.js)
+    }
+
+    return `${func} in ${filePath}`;
 }
 
 // Définir les niveaux de log personnalisés
@@ -56,11 +70,12 @@ const log = logger.createLogger({
 
 // Créer une fonction pour enregistrer avec le fichier appelant
 const logWithFile = (level: string, message: string, ...args: any[]) => {
-    const callerFile = getCallerFile(); // Obtenir le fichier appelant
+    const callerFile = getCallerInfo(); // Obtenir le fichier appelant
 
     // Utilise `keyof typeof log` pour garantir que `level` est une clé valide de `log`
     if (level in log) {
-        log[level as keyof typeof log](`${message} (from ${callerFile})`, ...args);
+        // log[level as keyof typeof log](`${message} (from ${callerFile})`, ...args);
+        log[level as keyof typeof log](`${message}`, ...args);
     } else {
         console.warn(`Niveau de log invalide : ${level}`);
     }

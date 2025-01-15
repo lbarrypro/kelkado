@@ -12,7 +12,7 @@ export interface AuthProviderInterface {
     getCurrentUser(): Promise<any>;
 
     // Gérer les sessions (avec un token)
-    setSession(token: string, refresh_token?:string): Promise<void>;
+    setSession(access_token: string, refresh_token?: string): Promise<void>;
 
     // Récupérer les informations de la session active
     getSession(): Promise<any>;
