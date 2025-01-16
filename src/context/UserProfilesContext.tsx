@@ -1,24 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { UserProfilesService } from '@/src/services/UserProfilesService';
-
-interface UserProfile {
-    id: string;
-    first_name: string;
-    last_name: string;
-    birthdate: string;
-    profile_picture: string;
-}
-
-interface UserProfilesContextType {
-    createProfile: (profileData: Partial<UserProfile>) => Promise<UserProfile>;
-    getProfile: (userId: string) => Promise<UserProfile>;
-    updateProfile: (userId: string, profileData: Partial<UserProfile>) => Promise<UserProfile>;
-    deleteProfile: (userId: string) => Promise<void>;
-}
+import { UserProfile, UserProfilesContextType } from '@/src/interfaces/UserProfileInterface';
 
 const UserProfilesContext = createContext<UserProfilesContextType | undefined>(undefined);
 
 export const UserProfilesProvider = ({ children }: { children: ReactNode }) => {
+    const [userData, setUserData] = useState<UserProfile | null>(null);
     const service = new UserProfilesService();
 
     const createProfile = async (profileData: Partial<UserProfile>) => {
@@ -38,7 +25,7 @@ export const UserProfilesProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <UserProfilesContext.Provider value={{ createProfile, getProfile, updateProfile, deleteProfile }}>
+        <UserProfilesContext.Provider value={{ userData, setUserData, createProfile, getProfile, updateProfile, deleteProfile }}>
             {children}
         </UserProfilesContext.Provider>
     );

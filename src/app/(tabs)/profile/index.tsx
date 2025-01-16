@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
-import { useUserProfiles } from '@/src/context/UserProfilesContext'; // Assurez-vous que ce hook est correctement implémenté
+import { useUserProfiles } from '@/src/context/UserProfilesContext';
 import logger from '@/src/utils/logger';
 
 export default function ProfileScreen() {
@@ -12,7 +12,7 @@ export default function ProfileScreen() {
     const router = useRouter();
 
     const { user: authUser, signOut } = useAuth(); // Récupère l'utilisateur authentifié
-    const { getProfile } = useUserProfiles(); // Assure-toi que `getProfile` est disponible dans ton contexte
+    const { getProfile } = useUserProfiles();
 
     // Fonction de déconnexion (signout)
     const handleSignOut = async () => {
@@ -31,19 +31,26 @@ export default function ProfileScreen() {
                     throw new Error('User not authenticated');
                 }
 
-                /*
-                // Récupérer les données du profil utilisateur
+                logger.debug('ProfileScreen :: fetchUserData :: authUser: ', authUser);
                 const profileData = await getProfile(authUser.id);
-                if (profileData) {
-                    setUserData(profileData); // Stocke les données du profil
+                if (!profileData) {
+                    setError('Error while retrieving profile');
                 }
-                */
+
+                // get follow data
+
 
                 // Exemple de récupération des listes utilisateur (à ajuster selon ta structure de base de données)
                 // Tu pourrais ajouter une méthode pour récupérer les listes si nécessaire
                 // const listsData = await getUserLists(authUser.id);
                 // setUserLists(listsData);
 
+                const data = {
+                    ...profileData,
+                };
+                if (!data.username) data.username = authUser.email;
+
+                setUserData(data);
             } catch (err) {
                 setError('Erreur lors de la récupération des données utilisateur');
                 logger.error('Error fetching user data: ', err);
@@ -54,7 +61,6 @@ export default function ProfileScreen() {
     }, [authUser, getProfile]);
 
     // Si les données sont en cours de récupération ou s'il y a une erreur
-    /*
     if (!userData || error) {
         return (
             <View style={styles.container}>
@@ -62,32 +68,32 @@ export default function ProfileScreen() {
             </View>
         );
     }
-    */
 
     return (
         <View style={styles.container}>
             {/* Header */}
 
-            {/*
             <View style={styles.header}>
-                <Image source={{ uri: userData.profileImage }} style={styles.profileImage} />
+                <Image source={{ uri: userData?.profile_picture }} style={styles.profileImage} />
                 <View style={styles.userInfo}>
-                    <Text style={styles.username}>{userData.username}</Text>
+                    <Text style={styles.username}>{userData?.username}</Text>
                     <View style={styles.stats}>
                         <Text style={styles.statItem}>
-                            <Text style={styles.statNumber}>{userData.followers}</Text> Followers
+                            <Text style={styles.statNumber}>{userData?.followers || 0}</Text> Followers
                         </Text>
                         <Text style={styles.statItem}>
-                            <Text style={styles.statNumber}>{userData.following}</Text> Following
+                            <Text style={styles.statNumber}>{userData?.following || 0}</Text> Following
                         </Text>
                     </View>
                 </View>
             </View>
-            */}
 
             {/* Menu */}
             <View style={styles.menu}>
-                <TouchableOpacity style={styles.menuButton}>
+                <TouchableOpacity
+                    style={styles.menuButton}
+                    onPress={() => router.push('/profile/edit')}
+                >
                     <Text style={styles.menuButtonText}>Edit Profile</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.primaryButton}>
@@ -106,7 +112,7 @@ export default function ProfileScreen() {
                     renderItem={({ item }) => (
                         <TouchableOpacity
                             style={styles.listItem}
-                            onPress={() => router.push(`/list/${item.id}`)} // Navigue vers la page de la liste
+                            onPress={() => router.push(`/list/${item.id}`)}
                         >
                             <Text style={styles.listItemText}>{item.title}</Text>
                         </TouchableOpacity>

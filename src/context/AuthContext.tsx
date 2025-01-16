@@ -1,26 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { AuthProviderInterface } from '@/src/providers/AuthProviderInterface'; // L'interface définie
 import { SupabaseAuthProvider } from '@/src/providers/SupabaseAuthProvider'; // Implémentation de Supabase
+import { User } from '@/src/interfaces/UserInterface';
+import { AuthContextType } from '@/src/interfaces/AuthInterface';
 import logger from '@/src/utils/logger';
-
-// Définir l'interface pour l'utilisateur
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    verified: boolean;
-}
-
-// Déclare l'interface du contexte
-interface AuthContextType {
-    authProvider: AuthProviderInterface; // Le type du provider
-    signIn: (email: string, password: string) => Promise<any>;
-    signUp: (email: string, password: string) => Promise<any>;
-    signOut: () => Promise<void>;
-    user: User | null;
-    isVerified: boolean;
-    loading: boolean;
-}
 
 // Crée un contexte avec un type par défaut
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -206,7 +189,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, [authProvider]);
 
     return (
-        <AuthContext.Provider value={{ authProvider: authProvider!, signIn, signUp, signOut, user, isVerified, loading }}>
+        <AuthContext.Provider value={{ authProvider: authProvider!, signIn, signUp, signOut, user, setUser, isVerified, setIsVerified, loading }}>
             {children}
         </AuthContext.Provider>
     );

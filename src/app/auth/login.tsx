@@ -5,24 +5,15 @@ import { useAuth } from '@/src/context/AuthContext';
 import { useUserProfiles } from "@/src/context/UserProfilesContext";
 import logger from "@/src/utils/logger"; // Contexte d'authentification
 
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    verified: boolean;
-}
-
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isSignup, setIsSignup] = useState(false); // Mode login ou signup
-    const [user, setUser] = useState<User | null>(null);
-    const [isVerified, setIsVerified] = useState(false);
     const router = useRouter();
 
     // Utilisation des méthodes d'authentification via le hook useAuth
-    const { authProvider, signIn, signUp } = useAuth();
+    const { authProvider, setUser, setIsVerified, isVerified, signIn, signUp } = useAuth();
 
     const useHandleAuth = (email: string, password: string) => {
         const { createProfile } = useUserProfiles();
@@ -48,7 +39,7 @@ export default function Login() {
                     }
 
                     setUser(data.user);
-                    logger.debug('Login :: useHandleAuth :: setUser');
+                    logger.debug('Login :: useHandleAuth :: setUser: ', data.user);
 
                     setIsVerified(authProvider.verifiedUser(data.user));
                     logger.debug('Login :: useHandleAuth :: setIsVerified');
@@ -58,7 +49,7 @@ export default function Login() {
                         logger.debug('Login :: useHandleAuth :: setSession');
                     }
 
-                    // router.push('/(tabs)/home');
+                    router.push('/(tabs)/home');
                 }
             } catch (error) {
                 setError('Une erreur est survenue.');
