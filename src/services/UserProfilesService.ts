@@ -66,4 +66,30 @@ export class UserProfilesService {
 
         return data;
     }
+
+    async getFollowerCount(userId: string) {
+        const { count, error } = await this.supabase
+            .from('followers')
+            .select('*', { count: 'exact', head: true })
+            .eq('followed_id', userId); // Utilisateur suivi
+
+        if (error) {
+            console.error('Error fetching follower count:', error);
+            throw error;
+        }
+        return count;
+    }
+
+    async getFollowingCount(userId: string) {
+        const { count, error } = await this.supabase
+            .from('followers')
+            .select('*', { count: 'exact', head: true })
+            .eq('follower_id', userId); // Utilisateur qui suit
+
+        if (error) {
+            console.error('Error fetching following count:', error);
+            throw error;
+        }
+        return count;
+    };
 }

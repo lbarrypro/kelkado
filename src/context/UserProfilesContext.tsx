@@ -24,8 +24,25 @@ export const UserProfilesProvider = ({ children }: { children: ReactNode }) => {
         return await service.deleteProfile(userId);
     };
 
+    const getFollowerCount = async (userId: string) => {
+        return await service.getFollowerCount(userId);
+    };
+
+    const getFollowingCount = async (userId: string) => {
+        return await service.getFollowingCount(userId);
+    };
+
     return (
-        <UserProfilesContext.Provider value={{ userData, setUserData, createProfile, getProfile, updateProfile, deleteProfile }}>
+        <UserProfilesContext.Provider value={{
+            userData,
+            setUserData,
+            createProfile,
+            getProfile,
+            updateProfile,
+            deleteProfile,
+            getFollowerCount,
+            getFollowingCount
+        }}>
             {children}
         </UserProfilesContext.Provider>
     );

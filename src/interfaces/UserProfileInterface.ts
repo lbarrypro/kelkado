@@ -12,4 +12,8 @@ export interface UserProfilesContextType {
     deleteProfile: (userId: string) => Promise<void>;
     userData: UserProfile | null;
     setUserData: (data: UserProfile) => void;
+
+    // Méthodes pour récupérer les followers et following
+    getFollowerCount: (userId: string) => Promise<number>;
+    getFollowingCount: (userId: string) => Promise<number>;
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Slot, useRouter } from 'expo-router';
 import { AuthProvider, useAuth } from '@/src/context/AuthContext'; // Contexte d'authentification
 import { UserProfilesProvider } from '@/src/context/UserProfilesContext'; // Contexte pour les profils utilisateurs
+import { ListsProvider } from '@/src/context/ListsContext'; // Contexte pour les profils utilisateurs
 import { Text, View } from 'react-native'; // Ajoutez Text et View ici
 import logger from '@/src/utils/logger'; // Importer le logger
 
@@ -10,12 +11,13 @@ export default function RootLayout() {
         // AuthProvider doit envelopper tout le contenu
         <AuthProvider>
             <UserProfilesProvider>
-                <AuthenticatedLayout />
+                <ListsProvider>
+                    <AuthenticatedLayout />
+                </ListsProvider>
             </UserProfilesProvider>
         </AuthProvider>
     );
 }
-
 
 function AuthenticatedLayout() {
     const { user, isVerified, loading } = useAuth(); // Hook pour accéder à l'utilisateur et son état de vérification

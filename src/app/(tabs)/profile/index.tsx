@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
 import { useUserProfiles } from '@/src/context/UserProfilesContext';
+import { useLists } from '@/src/context/ListsContext';
 import logger from '@/src/utils/logger';
 
 export default function ProfileScreen() {
@@ -12,7 +13,8 @@ export default function ProfileScreen() {
     const router = useRouter();
 
     const { user: authUser, signOut } = useAuth(); // Récupère l'utilisateur authentifié
-    const { getProfile } = useUserProfiles();
+    const { getProfile, getFollowerCount, getFollowingCount } = useUserProfiles();
+    const { getUserLists } = useLists();
 
     // Fonction de déconnexion (signout)
     const handleSignOut = async () => {
@@ -38,19 +40,25 @@ export default function ProfileScreen() {
                 }
 
                 // get follow data
+                const followerCount = await getFollowerCount(authUser.id);
+                const followingCount = await getFollowingCount(authUser.id);
 
-
-                // Exemple de récupération des listes utilisateur (à ajuster selon ta structure de base de données)
-                // Tu pourrais ajouter une méthode pour récupérer les listes si nécessaire
-                // const listsData = await getUserLists(authUser.id);
-                // setUserLists(listsData);
-
+                // Fusionner les données
                 const data = {
                     ...profileData,
+                    followerCount: followerCount || 0,
+                    followingCount: followingCount || 0,
                 };
+
                 if (!data.username) data.username = authUser.email;
 
+                logger.debug('ProfileScreen :: fetchUserData :: data: ', data);
                 setUserData(data);
+
+                // list data
+                const listsData = await getUserLists(authUser.id);
+                logger.debug('ProfileScreen :: fetchUserData :: listsData: ', listsData);
+                setUserLists(listsData);
             } catch (err) {
                 setError('Erreur lors de la récupération des données utilisateur');
                 logger.error('Error fetching user data: ', err);
@@ -79,10 +87,10 @@ export default function ProfileScreen() {
                     <Text style={styles.username}>{userData?.username}</Text>
                     <View style={styles.stats}>
                         <Text style={styles.statItem}>
-                            <Text style={styles.statNumber}>{userData?.followers || 0}</Text> Followers
+                            <Text style={styles.statNumber}>{userData?.followerCount}</Text> Followers
                         </Text>
                         <Text style={styles.statItem}>
-                            <Text style={styles.statNumber}>{userData?.following || 0}</Text> Following
+                            <Text style={styles.statNumber}>{userData?.followingCount}</Text> Following
                         </Text>
                     </View>
                 </View>
@@ -96,7 +104,10 @@ export default function ProfileScreen() {
                 >
                     <Text style={styles.menuButtonText}>Edit Profile</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.primaryButton}>
+                <TouchableOpacity
+                    style={styles.primaryButton}
+                    onPress={() => router.push('/profile/list/create')}
+                >
                     <Text style={styles.primaryButtonText}>+ Create New List</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.secondaryButton} onPress={handleSignOut}>
