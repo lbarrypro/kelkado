@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {createContext, ReactNode, useContext, useState} from 'react';
 import { ListsService } from '@/src/services/ListsService'; // Assurez-vous que l'import est correct
-import { List, ListsContextType } from '@/src/interfaces/ListInterface'; // Assurez-vous que l'import est correct
+import { List, ListsContextType } from '@/src/interfaces/ListInterface';
+import logger from '@/src/utils/logger';
 
 const ListsContext = createContext<ListsContextType | undefined>(undefined);
 
@@ -22,10 +23,13 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
         return userLists;
     };
 
+    const getListById = async (listId: string) => {
+        return await service.getListById(listId);
+    };
+
     // Récupérer toutes les listes publiques
     const getPublicLists = async () => {
-        const publicLists = await service.getPublicLists();
-        return publicLists;
+        return await service.getPublicLists();
     };
 
     // Mettre à jour une liste
@@ -66,17 +70,33 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
         );
     };
 
+    const getProductsByList = async (listId: string) => {
+        try {
+            const data = await service.getProductsByList(listId); // Appel API
+
+            const products = Object.values(data).map((item: any) => item.products);
+            logger.info('ListsContext :: getProductsByList :: products:', products);
+
+            return products; // Retourne le tableau d'objets produits
+        } catch (error) {
+            logger.error('ListsContext :: getProductsByList :: error :', error);
+            throw error;
+        }
+    };
+
     return (
         <ListsContext.Provider
             value={{
                 lists,
                 createList,
                 getUserLists,
+                getListById,
                 getPublicLists,
                 updateList,
                 deleteList,
                 addProductToList,
                 removeProductFromList,
+                getProductsByList,
             }}
         >
             {children}
