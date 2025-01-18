@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRouter, useSearchParams } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
 
 export default function EditList() {
+    const segments = useSegments();
+    const id = segments[segments.length - 2]; // L'avant-dernier segment contient l'ID
+
     const [list, setList] = useState({ name: '', description: '' });
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
-    const { id } = useSearchParams(); // Récupère l'ID de la liste
 
     useEffect(() => {
         // Récupérez les données de la liste par ID

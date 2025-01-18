@@ -58,7 +58,7 @@ export default function ListContentScreen() {
             {/* Header with Back Button and Edit Button */}
             <View style={styles.header}>
                 <TouchableOpacity
-                    onPress={() => router.push(`/list/${id}/edit`)} // Route vers l'édition de la liste
+                    onPress={() => router.push(`/profile/list/${id}/edit`)} // Route vers l'édition de la liste
                     style={styles.editButton}
                 >
                     <Text style={styles.editButtonText}>Edit</Text>

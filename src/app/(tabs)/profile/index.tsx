@@ -106,7 +106,7 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.primaryButton}
-                    onPress={() => router.push('/list/create')}
+                    onPress={() => router.push('/profile/list/create')}
                 >
                     <Text style={styles.primaryButtonText}>+ Create New List</Text>
                 </TouchableOpacity>
@@ -123,7 +123,7 @@ export default function ProfileScreen() {
                     renderItem={({ item }) => (
                         <TouchableOpacity
                             style={styles.listItem}
-                            onPress={() => router.push(`/list/${item.id}`)}
+                            onPress={() => router.push(`/profile/list/${item.id}`)}
                         >
                             <Text style={styles.listItemText}>{item.title}</Text>
                         </TouchableOpacity>
