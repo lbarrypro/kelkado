@@ -1,5 +1,3 @@
-import React from "react";
-
 export interface Product {
     id: string;
     name: string;
@@ -26,7 +24,11 @@ export interface ListsContextType {
     getListById: (listId: string) => Promise<List>;
     fetchPublicLists: () => Promise<void>;
     createList: (userId: string, title: string, description: string, visibility: 'private' | 'public') => Promise<List>;
-    updateList: (listId: string, title: string, description: string, visibility: 'private' | 'public') => Promise<List>;
+    updateList: (listId: string | string[], listData: {
+        visibility: string;
+        name: string;
+        description: string
+    }) => Promise<List>;
     deleteList: (listId: string) => Promise<void>;
     getProductsByList: (listId: string) => Promise<Product>;
 }

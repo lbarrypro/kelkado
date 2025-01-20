@@ -1,24 +1,41 @@
 import { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRouter, useSegments } from 'expo-router';
+import { View, TextInput, Button, StyleSheet, ActivityIndicator, Text } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLists } from "@/src/context/ListsContext";
+import logger from "@/src/utils/logger";
+import React from 'react';
 
 export default function EditList() {
-    const segments = useSegments();
-    const id = segments[segments.length - 2]; // L'avant-dernier segment contient l'ID
-
-    const [list, setList] = useState({ name: '', description: '' });
-    const [isLoading, setIsLoading] = useState(false);
+    const { id } = useLocalSearchParams();
+    const { getListById, updateList } = useLists();
     const router = useRouter();
 
+    const [listData, setListData] = useState({
+        title: '',
+        description: '',
+        visibility: '',
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
-        // Récupérez les données de la liste par ID
         const fetchList = async () => {
             try {
-                // Remplacez par votre fonction pour obtenir les détails
-                const data = { name: 'Sample List', description: 'Sample Description' };
-                setList(data);
+                if (!id) {
+                    throw new Error('Missing List ID');
+                }
+
+                const fetchedList = await getListById(id as string);
+                logger.info('EditList :: fetchList :: fetchedList:', fetchedList);
+
+                setListData({
+                    title: fetchedList?.title || '',
+                    description: fetchedList?.description || '',
+                    visibility: fetchedList?.visibility || '',
+                });
             } catch (error) {
                 console.error('Failed to fetch list:', error);
+                setError('Failed to load list details.');
             }
         };
 
@@ -27,32 +44,54 @@ export default function EditList() {
 
     const handleSave = async () => {
         setIsLoading(true);
+        setError(null);
 
         try {
-            // Remplacez par votre fonction pour mettre à jour la liste
-            console.log('Updating list:', list);
+            if (!id) {
+                throw new Error('Missing List ID');
+            }
 
-            router.back(); // Retour à la page précédente
+            await updateList(id as string, listData);
+            router.back();
         } catch (error) {
             console.error('Failed to update list:', error);
+            setError('Failed to update the list.');
         } finally {
             setIsLoading(false);
         }
     };
 
+    if (!id) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.errorText}>No List ID provided.</Text>
+            </View>
+        );
+    }
+
+    if (!listData.title && !isLoading) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator />
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
             <TextInput
                 style={styles.input}
                 placeholder="List Name"
-                value={list.name}
-                onChangeText={(value) => setList({ ...list, name: value })}
+                value={listData.title || ''} // Valeur par défaut pour éviter les erreurs
+                onChangeText={(value) => setListData({ ...listData, title: value })}
             />
             <TextInput
                 style={styles.input}
                 placeholder="Description"
-                value={list.description}
-                onChangeText={(value) => setList({ ...list, description: value })}
+                value={listData.description || ''}
+                onChangeText={(value) => setListData({ ...listData, description: value })}
             />
             {isLoading ? (
                 <ActivityIndicator />
@@ -74,5 +113,9 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 10,
         borderRadius: 5,
+    },
+    errorText: {
+        color: 'red',
+        marginBottom: 10,
     },
 });

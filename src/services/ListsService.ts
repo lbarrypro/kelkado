@@ -72,15 +72,13 @@ export class ListsService {
         return data;
     }
 
-    async updateList(listId: string, title: string, description: string, visibility: 'private' | 'public') {
+    async updateList(listId: string, listData: Record<string, any>) {
         logger.debug('ListsService :: updateList :: listId: ', listId);
-        logger.debug('ListsService :: updateList :: title: ', title);
-        logger.debug('ListsService :: updateList :: description: ', description);
-        logger.debug('ListsService :: updateList :: visibility: ', visibility);
+        logger.debug('ListsService :: updateList :: listData: ', listData);
 
         const { data, error } = await this.supabase
             .from('lists')
-            .update({ title, description, visibility })
+            .update(listData)
             .eq('id', listId)
             .single();
         if (error) throw error;
