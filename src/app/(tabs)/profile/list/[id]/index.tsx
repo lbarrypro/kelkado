@@ -2,42 +2,49 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useLists } from '@/src/context/ListsContext';
+import { useNavigation } from '@react-navigation/native';
 import logger from '@/src/utils/logger';
 
 export default function ListContentScreen() {
     const { id } = useLocalSearchParams(); // Récupération de l'ID depuis l'URL
     const { getListById, getProductsByList } = useLists(); // Récupérer les fonctions depuis ListsContext
+    const navigation = useNavigation();
 
-    const [listData, setListData] = useState<any>(null); // Détails de la liste
-    const [products, setProducts] = useState<any[]>([]); // Liste des produits
-    const [error, setError] = useState<string | null>(null);
+    const [listData, setListData] = useState(null); // Détails de la liste
+    const [products, setProducts] = useState([]); // Liste des produits
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                if (!id) {
-                    throw new Error('Missing List ID');
-                }
+                if (!id) throw new Error('Missing List ID');
 
                 // Récupération des détails de la liste
-                const fetchedList = await getListById(id as string);
-                logger.info('ListContentScreen :: fetchData :: fetchedList: ', fetchedList);
+                const fetchedList = await getListById(id);
+                logger.info('Fetched list:', fetchedList);
                 setListData(fetchedList);
 
+                if (fetchedList?.title) {
+                    navigation.setOptions({ title: fetchedList.title });
+                }
+
                 // Récupération des produits associés à la liste
-                const fetchedProducts = await getProductsByList(id as string);
-                logger.info('ListContentScreen :: fetchData :: fetchedProducts: ', fetchedProducts);
+                const fetchedProducts = await getProductsByList(id);
+                logger.info('Fetched products:', fetchedProducts);
                 setProducts(fetchedProducts);
             } catch (err) {
-                logger.error('ListContentScreen :: fetchData :: err: ', err);
+                logger.error('Error fetching data:', err);
                 setError('Failed to fetch data');
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchData(); // Exécute la récupération des données
-    }, [id, getListById, getProductsByList]);
+        fetchData();
+    }, [id, getListById, getProductsByList, navigation]);
 
-    if (!listData && !products.length && !error) {
+    if (loading) {
         return (
             <View style={styles.container}>
                 <Text style={styles.loadingText}>Loading data...</Text>
@@ -55,35 +62,34 @@ export default function ListContentScreen() {
 
     return (
         <View style={styles.container}>
-            {/* Header with Back Button and Edit Button */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    onPress={() => router.push(`/profile/list/${id}/edit`)} // Route vers l'édition de la liste
-                    style={styles.editButton}
-                >
-                    <Text style={styles.editButtonText}>Edit</Text>
-                </TouchableOpacity>
-            </View>
-
             {/* Affichage des détails de la liste */}
-            <View style={styles.listDetails}>
-                {/*<Text style={styles.listTitle}>{listData.title}</Text>*/}
-                <Text style={styles.listDescription}>{listData.description}</Text>
-                <Text style={styles.listVisibility}>Visibility: {listData.visibility}</Text>
-            </View>
+            {listData && (
+                <View style={styles.listDetails}>
+                    {/* <Text style={styles.listTitle}>{listData.title}</Text> */}
+                    <Text style={styles.listDescription}>{listData.description}</Text>
+                    <Text style={styles.listVisibility}>Visibility: {listData.visibility}</Text>
+                    <TouchableOpacity
+                        onPress={() => router.push(`/profile/list/${id}/edit`)}
+                        style={styles.editButton}
+                    >
+                        <Text style={styles.editButtonText}>Edit</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
 
             {/* Affichage des produits */}
             <FlatList
-                data={products} // Liste des produits associés à la liste récupérée
+                data={products}
                 keyExtractor={(item) => item.id}
                 numColumns={3}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.gridItem}>
+                    <TouchableOpacity
+                        onPress={() => router.push(`/profile/list/${id}/product/${item.id}`)}
+                        style={styles.gridItem}
+                    >
                         <Image source={{ uri: item.image }} style={styles.itemImage} />
                         <Text style={styles.itemTitle}>{item.name}</Text>
-                        <Text style={styles.itemPrice}>
-                            {item.price} {item.currency}
-                        </Text>
+                        <Text style={styles.itemPrice}>{item.price} {item.currency}</Text>
                     </TouchableOpacity>
                 )}
                 contentContainerStyle={styles.grid}
@@ -106,25 +112,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         justifyContent: 'space-between',
     },
-    backButton: {
-        padding: 10,
-        backgroundColor: '#444',
-        borderRadius: 8,
-    },
-    backButtonText: {
-        color: '#fff',
-        fontSize: 16,
-    },
-    headerTitle: {
-        color: '#fff',
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        flex: 1,
-    },
     editButton: {
         padding: 10,
-        backgroundColor: '#4caf50', // Vert pour éditer
+        backgroundColor: '#4caf50',
         borderRadius: 8,
     },
     editButtonText: {

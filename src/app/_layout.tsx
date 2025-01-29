@@ -3,7 +3,9 @@ import { Slot, useRouter } from 'expo-router';
 import { AuthProvider, useAuth } from '@/src/context/AuthContext'; // Contexte d'authentification
 import { UserProfilesProvider } from '@/src/context/UserProfilesContext'; // Contexte pour les profils utilisateurs
 import { ListsProvider } from '@/src/context/ListsContext'; // Contexte pour les profils utilisateurs
+import { ProductsProvider } from '@/src/context/ProductsContext';
 import { Text, View } from 'react-native'; // Ajoutez Text et View ici
+import { Provider as PaperProvider } from 'react-native-paper';
 import logger from '@/src/utils/logger'; // Importer le logger
 
 export default function RootLayout() {
@@ -11,9 +13,13 @@ export default function RootLayout() {
         // AuthProvider doit envelopper tout le contenu
         <AuthProvider>
             <UserProfilesProvider>
-                <ListsProvider>
-                    <AuthenticatedLayout />
-                </ListsProvider>
+                <PaperProvider>
+                    <ProductsProvider>
+                        <ListsProvider>
+                            <AuthenticatedLayout />
+                        </ListsProvider>
+                    </ProductsProvider>
+                </PaperProvider>
             </UserProfilesProvider>
         </AuthProvider>
     );
