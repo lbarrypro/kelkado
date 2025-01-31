@@ -41,7 +41,13 @@ export class ProductsService {
         }
 
         logger.debug('ProductsService :: getAllProducts :: data: ', data);
-        return data;
+
+        const dataArray: any[] = [];
+        Object.keys(data)?.map(async (i) => {
+            dataArray.push(data[i]);
+        });
+
+        return dataArray;
     }
 
     /**

@@ -13,7 +13,8 @@ export const ProductsProvider = ({ children }: { children: ReactNode }) => {
         try {
             const data = await service.getAllProducts();
             logger.info('ProductsContext :: fetchAllProducts :: products:', data);
-            setProducts(data);
+            // setProducts(data);
+            return data;
         } catch (error) {
             logger.error('ProductsContext :: fetchAllProducts :: error:', error);
             throw error;
