@@ -3,6 +3,7 @@ import { AuthProviderInterface } from '@/src/providers/AuthProviderInterface'; /
 import { SupabaseAuthProvider } from '@/src/providers/SupabaseAuthProvider'; // Implémentation de Supabase
 import { User } from '@/src/interfaces/UserInterface';
 import { AuthContextType } from '@/src/interfaces/AuthInterface';
+import { setItem, getItem, removeItem } from '@/src/storage';
 import logger from '@/src/utils/logger';
 
 // Crée un contexte avec un type par défaut
@@ -127,23 +128,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             try {
                 logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Début');
 
-                const session = await authProvider.getSession(); // Appel au provider
-                logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Session récupérée:', session);
+                // 1️⃣ Récupération de la session depuis AsyncStorage
+                const storedAccessToken = await getItem('access_token');
+                const storedRefreshToken = await getItem('refresh_token');
 
-                if (session?.user) {
-                    setUser(session.user);
-                    setIsVerified(authProvider.verifiedUser(session.user));
-                    logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Utilisateur défini:', session.user);
-                } else {
+                if (storedAccessToken && storedRefreshToken) {
+                    // 2️⃣ On informe Supabase du token stocké
+                    await authProvider.setSession(storedAccessToken, storedRefreshToken);
+                }
+
+                // 3️⃣ Récupération de l'utilisateur actuel après mise à jour de la session
+                const { data, error } = await authProvider.getSession();
+                logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Session récupérée:', data?.session);
+
+                if (error || !data?.session?.user) {
                     setUser(null);
                     setIsVerified(false);
                     logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Aucun utilisateur trouvé');
+
+                    return;
                 }
+
+                setUser(data.session.user);
+                setIsVerified(authProvider.verifiedUser(data.session.user));
+                logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Utilisateur défini:',data. session.user);
             } catch (error) {
                 logger.error('AuthProvider :: useEffect :: fetchInitialSession :: Error:', error);
             } finally {
-                logger.debug('AuthProvider :: useEffect :: fetchInitialSession ::  Fin du chargement');
-                setLoading(false); // Important pour signaler la fin de l'initialisation
+                logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: Fin du chargement');
+                setLoading(false);
             }
         };
 
@@ -157,7 +170,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     if (session?.user) {
                         setUser(session.user);
                         setIsVerified(authProvider.verifiedUser(session.user));
-                        logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: SIGNED_IN :: setIsVerified: ', authProvider.verifiedUser(session.user));
+
+                        // 1️⃣ Stocker les tokens récupérés si disponibles
+                        if (session.access_token && session.refresh_token) {
+                            await setItem('access_token', session.access_token);
+                            await setItem('refresh_token', session.refresh_token);
+
+                            // 2️⃣ Mettre à jour Supabase avec les tokens récupérés
+                            await authProvider.setSession(session.access_token, session.refresh_token);
+                        }
+
+                        logger.debug('AuthProvider :: onAuthStateChange :: INITIAL_SESSION :: Session restaurée, utilisateur défini.');
+                    } else {
+                        setUser(null);
+                        setIsVerified(false);
+                        logger.debug('AuthProvider :: onAuthStateChange :: INITIAL_SESSION :: Aucun utilisateur trouvé.');
                     }
                     break;
 
@@ -165,19 +192,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     if (session?.user) {
                         setUser(session.user);
                         setIsVerified(authProvider.verifiedUser(session.user));
-                        logger.debug('AuthProvider :: useEffect :: fetchInitialSession :: SIGNED_IN :: setIsVerified: ', authProvider.verifiedUser(session.user));
+
+                        // 4️⃣ Stocker les tokens pour la persistance
+                        await setItem('access_token', session.access_token);
+                        await setItem('refresh_token', session.refresh_token);
+
+                        logger.debug('AuthProvider :: onAuthStateChange :: SIGNED_IN :: Session stockée');
                     }
                     break;
 
                 case 'TOKEN_REFRESHED':
                     setUser(session?.user ?? null);
-                    await authProvider.setSession(session?.access_token, session?.refresh_token);
+
+                    // 5️⃣ Mise à jour des tokens stockés après un refresh
+                    await setItem('access_token', session.access_token);
+                    await setItem('refresh_token', session.refresh_token);
+                    await authProvider.setSession(session.access_token, session.refresh_token);
+
+                    logger.debug('AuthProvider :: onAuthStateChange :: TOKEN_REFRESHED :: Session mise à jour');
+
+                    if (session?.user) {
+                        setIsVerified(authProvider.verifiedUser(session.user));
+                    }
+
                     break;
 
                 case 'SIGNED_OUT':
                     setUser(null);
                     setIsVerified(false);
-                    // await authProvider.setSession(null, null);
+
+                    // 6️⃣ Suppression des tokens stockés après déconnexion
+                    await removeItem('access_token');
+                    await removeItem('refresh_token');
+
+                    logger.debug('AuthProvider :: onAuthStateChange :: SIGNED_OUT :: Session supprimée');
                     break;
 
                 default:
