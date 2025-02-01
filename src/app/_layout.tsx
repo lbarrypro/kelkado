@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from '@/src/context/AuthContext'; // Contexte d
 import { UserProfilesProvider } from '@/src/context/UserProfilesContext'; // Contexte pour les profils utilisateurs
 import { ListsProvider } from '@/src/context/ListsContext'; // Contexte pour les profils utilisateurs
 import { ProductsProvider } from '@/src/context/ProductsContext';
+import { HomeFeedProvider } from '@/src/context/HomeFeedContext';
 import { Text, View } from 'react-native'; // Ajoutez Text et View ici
 import { Provider as PaperProvider } from 'react-native-paper';
 import logger from '@/src/utils/logger'; // Importer le logger
@@ -16,7 +17,9 @@ export default function RootLayout() {
                 <PaperProvider>
                     <ProductsProvider>
                         <ListsProvider>
-                            <AuthenticatedLayout />
+                            <HomeFeedProvider>
+                                <AuthenticatedLayout />
+                            </HomeFeedProvider>
                         </ListsProvider>
                     </ProductsProvider>
                 </PaperProvider>

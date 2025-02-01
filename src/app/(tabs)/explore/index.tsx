@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { useProducts } from '@/src/context/ProductsContext';
 import logger from '@/src/utils/logger';
-import {router} from "expo-router";
+import { router } from "expo-router";
 
 export default function ExploreScreen() {
     const { fetchAllProducts } = useProducts(); // Récupération de la fonction du contexte
@@ -65,7 +65,7 @@ export default function ExploreScreen() {
                     numColumns={3}
                     renderItem={({ item }) => (
                         <TouchableOpacity
-                            // onPress={() => router.push(`/explore/product/${item.id}`)}
+                            onPress={() => router.push(`/explore/product/${item.id}`)}
                             style={styles.gridItem}
                         >
                             <Image source={{ uri: item.image }} style={styles.itemImage} />

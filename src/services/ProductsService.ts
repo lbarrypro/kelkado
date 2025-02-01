@@ -115,4 +115,24 @@ export class ProductsService {
         logger.debug('ProductsService :: deleteProduct :: data: ', data);
         return data;
     }
+
+    async getLatestProductsByFollowedUsers(followedIds: string[]) {
+        if (followedIds.length === 0) return [];
+
+        const { data, error } = await this.supabase
+            .from('products')
+            .select('*')
+            .in('user_id', followedIds)
+            .order('created_at', { ascending: false })
+            .limit(10); // Limite à 10 derniers produits
+
+        if (error) {
+            logger.error('ProductsService :: getLatestProductsByFollowedUsers :: error: ', error);
+            return [];
+        }
+
+        logger.debug('ProductsService :: getLatestProductsByFollowedUsers :: data: ', data);
+
+        return data;
+    }
 }

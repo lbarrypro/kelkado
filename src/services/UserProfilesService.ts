@@ -74,7 +74,7 @@ export class UserProfilesService {
             .eq('followed_id', userId); // Utilisateur suivi
 
         if (error) {
-            console.error('Error fetching follower count:', error);
+            logger.error('UserProfilesService :: getFollowerCount :: error: ', error);
             throw error;
         }
         return count;
@@ -87,9 +87,23 @@ export class UserProfilesService {
             .eq('follower_id', userId); // Utilisateur qui suit
 
         if (error) {
-            console.error('Error fetching following count:', error);
+            logger.error('UserProfilesService :: getFollowingCount :: error: ', error);
             throw error;
         }
         return count;
     };
+
+    async getFollowedUsers(userId: string) {
+        const { data, error } = await this.supabase
+            .from('user_follow_data')
+            .select('followed_id')
+            .eq('follower_id', userId);
+
+        if (error) {
+            logger.error('UserProfilesService :: getFollowedUsers :: error: ', error);
+            return [];
+        }
+
+        return data.map(user => user.followed_id);
+    }
 }

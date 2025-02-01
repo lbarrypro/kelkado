@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import logger from '@/src/utils/logger';
 
 export default function ListContentScreen() {
-    const { id } = useLocalSearchParams(); // Récupération de l'ID depuis l'URL
+    const { listId } = useLocalSearchParams(); // Récupération de l'ID depuis l'URL
     const { getListById, getProductsByList } = useLists(); // Récupérer les fonctions depuis ListsContext
     const navigation = useNavigation();
 
@@ -18,10 +18,10 @@ export default function ListContentScreen() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                if (!id) throw new Error('Missing List ID');
+                if (!listId) throw new Error('Missing List ID');
 
                 // Récupération des détails de la liste
-                const fetchedList = await getListById(id);
+                const fetchedList = await getListById(listId);
                 logger.info('Fetched list:', fetchedList);
                 setListData(fetchedList);
 
@@ -30,7 +30,7 @@ export default function ListContentScreen() {
                 }
 
                 // Récupération des produits associés à la liste
-                const fetchedProducts = await getProductsByList(id);
+                const fetchedProducts = await getProductsByList(listId);
                 logger.info('Fetched products:', fetchedProducts);
                 setProducts(fetchedProducts);
             } catch (err) {
@@ -42,7 +42,7 @@ export default function ListContentScreen() {
         };
 
         fetchData();
-    }, [id, getListById, getProductsByList, navigation]);
+    }, [listId, getListById, getProductsByList, navigation]);
 
     if (loading) {
         return (
@@ -69,7 +69,7 @@ export default function ListContentScreen() {
                     <Text style={styles.listDescription}>{listData.description}</Text>
                     <Text style={styles.listVisibility}>Visibility: {listData.visibility}</Text>
                     <TouchableOpacity
-                        onPress={() => router.push(`/profile/list/${id}/edit`)}
+                        onPress={() => router.push(`/profile/list/${listId}/edit`)}
                         style={styles.editButton}
                     >
                         <Text style={styles.editButtonText}>Edit</Text>
@@ -84,7 +84,7 @@ export default function ListContentScreen() {
                 numColumns={3}
                 renderItem={({ item }) => (
                     <TouchableOpacity
-                        onPress={() => router.push(`/profile/list/${id}/product/${item.id}`)}
+                        onPress={() => router.push(`/profile/list/${listId}/product/${item.id}`)}
                         style={styles.gridItem}
                     >
                         <Image source={{ uri: item.image }} style={styles.itemImage} />
