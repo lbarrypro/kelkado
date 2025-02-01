@@ -119,12 +119,15 @@ export class ProductsService {
     async getLatestProductsByFollowedUsers(followedIds: string[]) {
         if (followedIds.length === 0) return [];
 
+        logger.debug('ProductsService :: getLatestProductsByFollowedUsers :: followedIds: ', followedIds);
+
         const { data, error } = await this.supabase
-            .from('products')
-            .select('*')
-            .in('user_id', followedIds)
-            .order('created_at', { ascending: false })
-            .limit(10); // Limite à 10 derniers produits
+            .from('user_followed_products')
+            .select('id:product_id, *')  // Alias pour product_id
+            .in('owner_id', followedIds)
+            .eq('visibility', 'public')  // Filtre sur la visibilité
+            .order('added_at', { ascending: false })
+            .limit(10);
 
         if (error) {
             logger.error('ProductsService :: getLatestProductsByFollowedUsers :: error: ', error);
@@ -132,6 +135,13 @@ export class ProductsService {
         }
 
         logger.debug('ProductsService :: getLatestProductsByFollowedUsers :: data: ', data);
+
+        const dataArray: any[] = [];
+        Object.keys(data)?.map(async (i) => {
+            dataArray.push(data[i]);
+        });
+
+        logger.debug('ProductsService :: getLatestProductsByFollowedUsers :: dataArray: ', dataArray);
 
         return data;
     }

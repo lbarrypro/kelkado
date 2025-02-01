@@ -52,7 +52,7 @@ export default function TabLayout() {
                 name="home"  // Renommé de "index" à "home"
                 options={{
                     title: 'Home',
-                    headerShown: false, // Enlève le header
+                    // headerShown: false, // Enlève le header
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons
                             name={focused ? 'home-sharp' : 'home-outline'}
@@ -90,7 +90,7 @@ export default function TabLayout() {
                 name="notifications"
                 options={{
                     title: 'Notifications',
-                    headerShown: false, // Enlève le header
+                    // headerShown: false, // Enlève le header
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons
                             name={focused ? 'notifications' : 'notifications-outline'}

@@ -106,4 +106,37 @@ export class UserProfilesService {
 
         return data.map(user => user.followed_id);
     }
+
+    async followUser(followerId: string, followedId: string) {
+        const { data, error } = await this.supabase
+            .from('followers') // Assure-toi que le nom de ta table est correct
+            .insert([
+                {
+                    follower_id: followerId,
+                    followed_id: followedId,
+                }
+            ]);
+
+        if (error) {
+            logger.error('UserProfilesService :: followUser :: error: ', error);
+            return null;
+        }
+
+        return data;
+    }
+
+    async getOtherUsers(currentUserId: string) {
+        const { data, error } = await this.supabase
+            .from('user_profiles') // Remplace par ton nom de table d'utilisateurs
+            .select('id, username')
+            .neq('id', currentUserId) // Exclure l'utilisateur courant
+            .limit(10);
+
+        if (error) {
+            logger.error('UserProfilesService :: getOtherUsers :: error: ', error);
+            return [];
+        }
+
+        return data;
+    }
 }

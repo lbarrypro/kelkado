@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { UserProfilesService } from '@/src/services/UserProfilesService';
-import { ProductsService } from '@/src/services/ProductsService';
+import { useUserProfiles } from '@/src/context/UserProfilesContext';
+import { useProducts } from '@/src/context/ProductsContext';
 import { useAuth } from '@/src/context/AuthContext';
+import logger from "@/src/utils/logger";
 
 const HomeFeedContext = createContext(null);
 
@@ -12,20 +13,25 @@ export function HomeFeedProvider({ children }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const userProfilesService = new UserProfilesService();
-    const productsService = new ProductsService();
+    const { getFollowedUsers } = useUserProfiles();
+    const { getLatestProductsByFollowedUsers } = useProducts();
 
     useEffect(() => {
         const fetchData = async () => {
+            // Réinitialise l'erreur à chaque exécution de useEffect
+            setError(null);
+
+            logger.debug('HomeFeedProvider :: Vérification des états de l\'utilisateur:', { user, loading });
+
             if (!user) {
+                logger.debug('HomeFeedProvider :: useEffect - User is falsy:', user);
                 setError('User not logged in');
                 setLoading(false);
                 return;
             }
 
             try {
-                const followedIds = await userProfilesService.getFollowedUsers(user.id);
-                console.log('### followedIds: ', followedIds);
+                const followedIds = await getFollowedUsers(user.id);
                 setFollowedIds(followedIds);
 
                 if (followedIds.length === 0) {
@@ -34,14 +40,13 @@ export function HomeFeedProvider({ children }) {
                     return;
                 }
 
-                const products = await productsService.getLatestProductsByFollowedUsers(followedIds);
-                console.log('### products: ', products);
-
+                const products = await getLatestProductsByFollowedUsers(followedIds);
                 setProducts(products);
                 if (products.length === 0) {
                     setError('No products found from followed users.');
                 }
             } catch (err) {
+                logger.error('HomeFeedProvider :: useEffect :: error: ', err);
                 setError('Error fetching data');
             } finally {
                 setLoading(false);

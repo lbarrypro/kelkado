@@ -16,4 +16,5 @@ export interface ProductsContextType {
     createProduct: (name: string, url: string, price: number, description: string, currency: string) => Promise<Product>;
     updateProduct: (productId: string, productData: Partial<Product>) => Promise<Product>;
     deleteProduct: (productId: string) => Promise<void>;
+    getLatestProductsByFollowedUsers: (followedIds: string[]) => Promise<Product[]>;
 }

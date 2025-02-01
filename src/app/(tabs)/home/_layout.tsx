@@ -7,7 +7,7 @@ export default function ExploreLayout() {
             <Stack.Screen
                 name="index"
                 options={{
-                    title: "Explore",
+                    title: "Home",
                     headerShown: false
                 }}
             />

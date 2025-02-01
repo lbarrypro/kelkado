@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {createContext, useContext, useState, ReactNode, useEffect} from 'react';
 import { UserProfilesService } from '@/src/services/UserProfilesService';
 import { UserProfile, UserProfilesContextType } from '@/src/interfaces/UserProfileInterface';
 
@@ -6,6 +6,9 @@ const UserProfilesContext = createContext<UserProfilesContextType | undefined>(u
 
 export const UserProfilesProvider = ({ children }: { children: ReactNode }) => {
     const [userData, setUserData] = useState<UserProfile | null>(null);
+    const [otherUsers, setOtherUsers] = useState<UserProfile[]>([]);
+    const [followedUsers, setFollowedUsers] = useState<UserProfile[]>([]);
+
     const service = new UserProfilesService();
 
     const createProfile = async (profileData: Partial<UserProfile>) => {
@@ -32,6 +35,29 @@ export const UserProfilesProvider = ({ children }: { children: ReactNode }) => {
         return await service.getFollowingCount(userId);
     };
 
+    const getOtherUsers = async (currentUserId: string) => {
+        return await service.getOtherUsers(currentUserId);
+    };
+
+    const getFollowedUsers = async (userId: string) => {
+        const followed = await service.getFollowedUsers(userId);
+        setFollowedUsers(followed);
+        return followed;
+    }
+
+    const followUser = async (followerId: string, followedId: string) => {
+        const followed = await service.followUser(followerId, followedId);
+        getFollowedUsers(followerId);
+
+        return followed;
+    };
+
+    useEffect(() => {
+        if (userData) {
+            getFollowedUsers(userData.id);
+        }
+    }, [userData]);
+
     return (
         <UserProfilesContext.Provider value={{
             userData,
@@ -41,7 +67,10 @@ export const UserProfilesProvider = ({ children }: { children: ReactNode }) => {
             updateProfile,
             deleteProfile,
             getFollowerCount,
-            getFollowingCount
+            getFollowingCount,
+            getOtherUsers,
+            getFollowedUsers,
+            followUser
         }}>
             {children}
         </UserProfilesContext.Provider>

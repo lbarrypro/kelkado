@@ -69,8 +69,21 @@ export const ProductsProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const getLatestProductsByFollowedUsers = async (followedIds: string[]) => {
+        return await service.getLatestProductsByFollowedUsers(followedIds);
+    }
+
     return (
-        <ProductsContext.Provider value={{ products, setProducts, fetchAllProducts, getProductById, createProduct, updateProduct, deleteProduct }}>
+        <ProductsContext.Provider value={{
+            products,
+            setProducts,
+            fetchAllProducts,
+            getProductById,
+            createProduct,
+            updateProduct,
+            deleteProduct,
+            getLatestProductsByFollowedUsers
+        }}>
             {children}
         </ProductsContext.Provider>
     );

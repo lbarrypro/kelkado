@@ -167,7 +167,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             switch (event) {
                 case 'INITIAL_SESSION':
-                    if (session?.user) {
+                    if (session?.user && (!user || user?.id !== session.user.id)) {
                         setUser(session.user);
                         setIsVerified(authProvider.verifiedUser(session.user));
 
@@ -189,7 +189,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     break;
 
                 case 'SIGNED_IN':
-                    if (session?.user) {
+                    if (session?.user && (!user || user?.id !== session.user.id)) {
                         setUser(session.user);
                         setIsVerified(authProvider.verifiedUser(session.user));
 
