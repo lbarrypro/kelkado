@@ -7,7 +7,7 @@ import { ProductsProvider } from '@/src/context/ProductsContext';
 import { HomeFeedProvider } from '@/src/context/HomeFeedContext';
 import { Text, View } from 'react-native'; // Ajoutez Text et View ici
 import { Provider as PaperProvider } from 'react-native-paper';
-import logger from '@/src/utils/logger'; // Importer le logger
+import logger from '@/src/utils/logger';
 
 export default function RootLayout() {
     return (
