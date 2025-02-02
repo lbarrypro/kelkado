@@ -128,9 +128,8 @@ export class UserProfilesService {
     async getOtherUsers(currentUserId: string) {
         const followedUsers = await this.getFollowedUsers(currentUserId);
         followedUsers.push(currentUserId); // Exclure l'utilisateur courant
-        const idsString = `(${followedUsers.join(', ')})`;
-
-        console.log('## idsString: ', idsString)
+        const idsString = `(${followedUsers.join(',')})`; // NO whitespaces (IMPORTANT)
+        logger.debug('UserProfilesService :: getOtherUsers :: idsString: ', idsString);
 
         const { data, error } = await this.supabase
             .from('user_profiles') // Remplace par ton nom de table d'utilisateurs
