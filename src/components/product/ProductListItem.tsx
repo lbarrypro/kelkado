@@ -2,9 +2,15 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from "expo-router";
 
-export default function ProductListItem({ product: string, redirectTo: string }) {
+export default function ProductListItem({ product, redirectTo, listId }) {
     const handlePress = () => {
-        router.push(`${redirectTo}/${product.id}`); // URL dynamique
+        let dynamicUrl = redirectTo.replace('${productId}', product.id);
+
+        if (listId) {
+            dynamicUrl = dynamicUrl.replace('${listId}', listId);
+        }
+
+        router.push(dynamicUrl);
     };
 
     return (

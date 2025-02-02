@@ -83,7 +83,11 @@ export default function ListContentScreen() {
                 data={products}
                 keyExtractor={(item) => item.id}
                 numColumns={3}
-                renderItem={({ item }) => <ProductListItem product={item} redirectTo=`/profile/list/${listId}/product` />}
+                renderItem={({ item }) => <ProductListItem
+                    product={item}
+                    redirectTo="/profile/list/${listId}/product/${productId}"
+                    listId={listId}
+                />}
                 contentContainerStyle={styles.grid}
                 ListEmptyComponent={<Text style={styles.emptyText}>No products found.</Text>}
             />

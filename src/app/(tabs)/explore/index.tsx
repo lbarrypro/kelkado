@@ -64,7 +64,10 @@ export default function ExploreScreen() {
                     data={filteredItems}
                     keyExtractor={(item) => item.id.toString()}
                     numColumns={3}
-                    renderItem={({ item }) => <ProductListItem product={item} redirectTo="/explore/product" />}
+                    renderItem={({ item }) => <ProductListItem
+                        product={item}
+                        redirectTo="/explore/product/${productId}"
+                    />}
                     contentContainerStyle={styles.grid}
                 />
             )}
