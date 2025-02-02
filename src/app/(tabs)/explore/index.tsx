@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { useProducts } from '@/src/context/ProductsContext';
+import ProductListItem from '@/src/components/product/ProductListItem';
 import logger from '@/src/utils/logger';
 import { router } from "expo-router";
 
@@ -63,16 +64,7 @@ export default function ExploreScreen() {
                     data={filteredItems}
                     keyExtractor={(item) => item.id.toString()}
                     numColumns={3}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity
-                            onPress={() => router.push(`/explore/product/${item.id}`)}
-                            style={styles.gridItem}
-                        >
-                            <Image source={{ uri: item.image }} style={styles.itemImage} />
-                            <Text style={styles.itemTitle}>{item.name}</Text>
-                            <Text style={styles.itemPrice}>{item.price} {item.currency}</Text>
-                        </TouchableOpacity>
-                    )}
+                    renderItem={({ item }) => <ProductListItem product={item} redirectTo="/explore/product" />}
                     contentContainerStyle={styles.grid}
                 />
             )}

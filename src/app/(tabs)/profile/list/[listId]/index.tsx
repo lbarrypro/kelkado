@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useLists } from '@/src/context/ListsContext';
+import ProductListItem from '@/src/components/product/ProductListItem';
 import { useNavigation } from '@react-navigation/native';
 import logger from '@/src/utils/logger';
 
@@ -82,16 +83,7 @@ export default function ListContentScreen() {
                 data={products}
                 keyExtractor={(item) => item.id}
                 numColumns={3}
-                renderItem={({ item }) => (
-                    <TouchableOpacity
-                        onPress={() => router.push(`/profile/list/${listId}/product/${item.id}`)}
-                        style={styles.gridItem}
-                    >
-                        <Image source={{ uri: item.image }} style={styles.itemImage} />
-                        <Text style={styles.itemTitle}>{item.name}</Text>
-                        <Text style={styles.itemPrice}>{item.price} {item.currency}</Text>
-                    </TouchableOpacity>
-                )}
+                renderItem={({ item }) => <ProductListItem product={item} redirectTo=`/profile/list/${listId}/product` />}
                 contentContainerStyle={styles.grid}
                 ListEmptyComponent={<Text style={styles.emptyText}>No products found.</Text>}
             />

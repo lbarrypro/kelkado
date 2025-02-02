@@ -10,10 +10,11 @@ export function HomeFeedProvider({ children }) {
     const { user } = useAuth();
     const [products, setProducts] = useState([]);
     const [followedIds, setFollowedIds] = useState([]);
+    const [followSuggestions, setFollowSuggestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const { getFollowedUsers } = useUserProfiles();
+    const { getFollowedUsers, getOtherUsers } = useUserProfiles();
     const { getLatestProductsByFollowedUsers } = useProducts();
 
     useEffect(() => {
@@ -35,7 +36,8 @@ export function HomeFeedProvider({ children }) {
                 setFollowedIds(followedIds);
 
                 if (followedIds.length === 0) {
-                    setError('You are not following anyone.');
+                    // setError('You are not following anyone.');
+                    fetchSuggestions();
                     setLoading(false);
                     return;
                 }
@@ -43,13 +45,26 @@ export function HomeFeedProvider({ children }) {
                 const products = await getLatestProductsByFollowedUsers(followedIds);
                 setProducts(products);
                 if (products.length === 0) {
-                    setError('No products found from followed users.');
+                    // setError('No products found from followed users.');
+                    fetchSuggestions();
                 }
             } catch (err) {
                 logger.error('HomeFeedProvider :: useEffect :: error: ', err);
                 setError('Error fetching data');
             } finally {
                 setLoading(false);
+            }
+        };
+
+        // Fonction pour récupérer les suggestions d'utilisateurs à suivre
+        const fetchSuggestions = async () => {
+            if (!user) return;
+
+            try {
+                const suggestions = await getOtherUsers(user.id); // Assure-toi que cette fonction est définie dans `useUserProfiles`
+                setFollowSuggestions(suggestions);
+            } catch (err) {
+                logger.error('Error fetching follow suggestions:', err);
             }
         };
 
