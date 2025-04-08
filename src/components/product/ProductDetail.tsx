@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Platform, Linking } from 'react-native';
 import { useNavigation } from 'expo-router';
 import WebViewModal from '@/src/components/WebViewModal';
 import { useProducts } from '@/src/context/ProductsContext';
@@ -26,7 +26,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
                 logger.info('ProductDetail :: fetchProduct :: fetchedProduct: ', fetchedProduct);
                 setProduct(fetchedProduct);
 
-                // Mise à jour du titre du header
                 navigation.setOptions({ title: fetchedProduct.name });
             } catch (err) {
                 logger.error('ProductDetail :: fetchProduct :: err: ', err);
@@ -36,6 +35,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
 
         fetchProduct();
     }, [productId, getProductById, navigation]);
+
+    const handleViewProduct = () => {
+        if (!product?.url) return;
+        if (Platform.OS === 'web') {
+            window.open(product.url, '_blank');
+        } else {
+            setWebViewVisible(true);
+        }
+    };
 
     if (!product && !error) {
         return (
@@ -57,10 +65,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
         <View style={styles.container}>
             <Image source={{ uri: product.image }} style={styles.productImage} />
             <Text style={styles.productTitle}>{product.name}</Text>
-            <Text style={styles.productPrice}>{product.price} {product.currency}</Text>
+            <Text style={styles.productPrice}>
+                {product.price} {product.currency}
+            </Text>
             <Text style={styles.productDescription}>{product.description}</Text>
 
-            <TouchableOpacity style={styles.buyButton} onPress={() => setWebViewVisible(true)}>
+            <TouchableOpacity style={styles.buyButton} onPress={handleViewProduct}>
                 <Text style={styles.buyButtonText}>View Product</Text>
             </TouchableOpacity>
 

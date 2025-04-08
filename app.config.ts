@@ -7,10 +7,15 @@ export default ({ config }: { config: any }) => ({
 		version: '1.0.0',
 		entryPoint: 'index.ts',
 		orientation: 'portrait',
-		icon: './assets/images/icon.png',
+		icon: './assets/images/logo.png',
 		scheme: 'myapp',
 		userInterfaceStyle: 'automatic',
 		newArchEnabled: true,
+		splash: {
+			image: './assets/images/logo.png',
+			resizeMode: 'contain',
+			backgroundColor: '#ffffff'
+		},
 		ios: {
 			supportsTablet: true,
 			orientation: 'portrait',  // Ajouter ici pour forcer le mode portrait
